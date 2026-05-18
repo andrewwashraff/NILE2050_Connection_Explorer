@@ -1,8 +1,11 @@
 <!DOCTYPE html>
+
 <html lang="en"><head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>NILE 2050 — Connection Explorer</title>
+<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   :root{
@@ -58,7 +61,7 @@
   .section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
   .count-badge{font-size:12px;font-weight:900;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 8px;color:var(--ink)}
   .conn-list{display:flex;flex-direction:column;gap:8px;max-height:none}
-  .conn-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 46px 12px 12px;display:flex;gap:11px;align-items:flex-start;cursor:pointer;transition:.16s;position:relative}
+  .conn-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 52px 32px 12px;display:flex;gap:11px;align-items:flex-start;cursor:pointer;transition:.16s;position:relative}
   .conn-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm);border-color:var(--line2)}
   .arrow{width:28px;height:28px;display:grid;place-items:center;border-radius:10px;font-weight:900;flex:0 0 auto;background:var(--soft2)}
   .conn-name{font-size:13px;font-weight:900;margin-bottom:4px;line-height:1.2}
@@ -66,6 +69,8 @@
   .strength{margin-left:auto;font-weight:900;color:var(--muted2);font-size:14px}
   .remove-conn{position:absolute;top:10px;right:10px;z-index:5;width:26px;height:26px;border-radius:999px;background:var(--soft2);border:1px solid var(--line);color:#d64545;font-weight:900;display:grid;place-items:center;cursor:pointer;line-height:1;transition:.16s}
   .remove-conn:hover{background:#fff;transform:translateY(-1px);box-shadow:var(--shadow-sm);border-color:#f0b8b8}
+  .see-map{position:absolute;right:10px;bottom:10px;z-index:4;border:1px solid var(--line);background:var(--soft2);color:#2b6cb0;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:900;cursor:pointer;transition:.16s}
+  .see-map:hover{background:#fff;box-shadow:var(--shadow-sm);transform:translateY(-1px)}
   .section-tools{display:flex;align-items:center;gap:8px}
   .add-conn{width:28px;height:28px;border-radius:999px;background:#fff;border:1px solid var(--line);color:#1f7a4f;font-weight:900;display:grid;place-items:center;cursor:pointer;line-height:1;transition:.16s;box-shadow:0 4px 12px rgba(16,24,32,.05)}
   .add-conn:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm);border-color:#9fd7ba;background:#f8fffb}
@@ -171,397 +176,126 @@
   .added-title{font-size:12px;font-weight:900;text-transform:uppercase;color:var(--muted);letter-spacing:.08em;margin-bottom:2px}
   .added-item{background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;justify-content:space-between;gap:12px;font-size:13px;line-height:1.4}
   .del-btn{background:#fff;border:1px solid var(--line);border-radius:10px;width:30px;height:30px;cursor:pointer;color:#d64545;font-weight:900}
-  @media(max-width:880px){.detail-grid,.form-grid,.project-overview{grid-template-columns:1fr}.shot-card{max-width:none}.shot-frame{height:220px;flex:none}.matrix-layout{display:block;width:max-content}.legend{position:static;margin-top:16px;width:100%}}
+
+  /* MAP VIEW */
+  .map-title{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .map-title h2{font-size:22px;letter-spacing:-.03em}
+  .map-title p{color:var(--muted);font-size:13px;margin-top:4px;max-width:720px;line-height:1.5}
+  .map-layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}
+  .map-card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:12px;box-shadow:var(--shadow);height:calc(100vh - 170px);min-height:560px;max-height:760px;overflow:hidden;position:sticky;top:18px}
+  #nile-map{width:100%;height:100%;border-radius:18px;background:#dde7ee;overflow:hidden}
+  #nile-map .leaflet-tile{filter:saturate(.58) contrast(.94) brightness(1.07)}
+  .leaflet-container{font:inherit;background:var(--soft2)}
+  .leaflet-control-attribution{font-size:10px;color:var(--muted)}
+  .leaflet-popup-content-wrapper{border-radius:16px;box-shadow:var(--shadow-sm)}
+  .leaflet-popup-content{font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:12px;line-height:1.45;margin:12px 14px}
+  .map-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .map-toggle,.map-reset-soft{border:1px solid var(--line);background:rgba(255,255,255,.82);border-radius:999px;padding:9px 12px;font-size:12px;font-weight:900;color:var(--muted);cursor:pointer;box-shadow:var(--shadow-sm);transition:.16s}
+  .map-toggle:hover,.map-reset-soft:hover{transform:translateY(-1px);background:#fff;color:var(--ink)}
+  .map-toggle.active{background:var(--dark);border-color:var(--dark);color:#fff}
+  .map-marker{width:16px;height:16px;border-radius:999px;background:var(--axis);border:2px solid rgba(255,255,255,.96);box-shadow:0 5px 13px rgba(16,24,32,.22),0 0 0 1px rgba(16,24,32,.14);display:block;cursor:pointer;transition:transform .18s,opacity .18s,filter .18s,box-shadow .18s,border-color .18s;backdrop-filter:blur(8px)}
+  .map-marker:before{content:"";position:absolute;inset:-5px;border-radius:999px;background:color-mix(in srgb,var(--axis) 16%, transparent);opacity:.55;transition:.18s}
+  .map-marker:after{content:"";position:absolute;inset:4px;border-radius:999px;background:rgba(255,255,255,.72)}
+  .map-marker.selected{transform:scale(1.38);border-color:#fff;box-shadow:0 10px 24px rgba(16,24,32,.24),0 0 0 5px rgba(255,255,255,.72),0 0 0 8px color-mix(in srgb,var(--axis) 22%, transparent)}
+  .map-marker.connected{transform:scale(1.18);border-color:#fff;filter:saturate(1.16);box-shadow:0 8px 18px rgba(16,24,32,.20),0 0 0 4px color-mix(in srgb,var(--axis) 18%, transparent)}
+  .map-marker.axis-core{transform:scale(1.24);border-color:#fff;box-shadow:0 9px 22px rgba(16,24,32,.20),0 0 0 4px color-mix(in srgb,var(--axis) 20%, transparent)}
+  .map-marker.axis-related{transform:scale(1.1);border-color:#fff;filter:saturate(1.08)}
+  .map-marker.focused{transform:scale(1.26);border-color:#fff;box-shadow:0 10px 24px rgba(16,24,32,.21),0 0 0 5px color-mix(in srgb,var(--axis) 20%, transparent)}
+  .map-marker.faded{opacity:.18;filter:grayscale(.92);box-shadow:none;transform:scale(.82)}
+  .leaflet-tooltip.project-tooltip{border:1px solid rgba(16,24,32,.10);border-radius:999px;background:rgba(255,255,255,.94);box-shadow:0 8px 18px rgba(16,24,32,.10);color:#101418;font-weight:900;font-size:11px;padding:5px 8px}
+  .leaflet-tooltip.project-tooltip:before{display:none}
+  .map-side{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:16px;box-shadow:var(--shadow);height:calc(100vh - 170px);min-height:560px;max-height:760px;display:flex;flex-direction:column;gap:14px;position:sticky;top:18px;overflow-y:auto;overscroll-behavior:auto;scrollbar-width:thin}
+  .map-side::-webkit-scrollbar{width:8px}
+  .map-side::-webkit-scrollbar-thumb{background:var(--line2);border-radius:999px}
+  .map-side::-webkit-scrollbar-track{background:transparent}
+  .map-side-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:14px}
+  .map-side-kicker{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:5px}
+  .map-side-title{font-size:21px;font-weight:900;letter-spacing:-.04em;line-height:1.08}
+  .map-reset{width:32px;height:32px;border-radius:999px;background:var(--soft2);border:1px solid var(--line);color:var(--muted);font-weight:900;cursor:pointer;flex:0 0 auto}
+  .map-reset:hover{background:#fff;color:var(--ink);box-shadow:var(--shadow-sm)}
+  .map-info-card{background:var(--soft);border:1px solid var(--line);border-radius:18px;padding:13px}
+  .map-info-card h3{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+  .map-info-card p{font-size:12px;line-height:1.55;color:#475467}
+  .map-location-line{font-size:12px;line-height:1.55;color:#475467;display:grid;gap:5px}
+  .map-location-line b{color:var(--ink)}
+  .map-connections{display:grid;gap:8px}
+  .map-conn-row{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;cursor:pointer;transition:.16s;display:grid;gap:6px;position:relative;overflow:hidden}
+  .map-conn-row:before{content:"";position:absolute;inset:0 0 0 auto;width:4px;background:linear-gradient(180deg,rgba(76,175,130,.8),rgba(91,164,212,.8));opacity:.55}
+  .map-conn-row:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+  .map-conn-row.hidden-line{opacity:.48;background:var(--soft2)}
+  .map-conn-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:900}
+  .map-conn-desc{font-size:11px;line-height:1.45;color:var(--muted)}
+  .conn-toggle{width:30px;height:20px;border-radius:999px;border:1px solid var(--line);background:var(--soft2);position:relative;cursor:pointer;flex:0 0 auto;transition:.16s}
+  .conn-toggle:after{content:"";position:absolute;top:3px;left:3px;width:12px;height:12px;border-radius:999px;background:#fff;box-shadow:0 2px 5px rgba(16,24,32,.18);transition:.16s}
+  .conn-toggle.on{background:var(--dark);border-color:var(--dark)}
+  .conn-toggle.on:after{left:13px}
+  .map-legend{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto;padding-top:12px;border-top:1px solid var(--line)}
+  .map-legend-pill{font-size:10px;font-weight:900;border-radius:999px;padding:6px 8px;background:var(--soft);border:1px solid var(--line);display:flex;gap:5px;align-items:center;color:#475467}
+  .map-legend-dot{width:8px;height:8px;border-radius:999px;background:var(--axis)}
+  .map-empty{color:var(--muted);font-size:13px;line-height:1.55}
+
+  @media(max-width:880px){.detail-grid,.form-grid,.project-overview{grid-template-columns:1fr}.shot-card{max-width:none}.shot-frame{height:220px;flex:none}.matrix-layout{display:block;width:max-content}.legend{position:static;margin-top:16px;width:100%}.map-layout{grid-template-columns:1fr}.map-side{position:static;height:auto;max-height:520px;min-height:auto}.map-card{position:static;height:520px;min-height:520px}}
 </style>
 </head>
 <body>
 <div class="app">
-  <header>
-    <div class="header-row">
-      <div class="brand">
-        <div class="logo-mark">N50</div>
-        <div>
-          <h1>NILE 2050 Connection Explorer</h1>
-          <div class="sub">Project network dashboard · redesigned from content only</div>
-        </div>
-      </div>
-      <div class="tabs">
-        <button class="tab active" onclick="switchTab('explorer')">Explorer</button>
-        <button class="tab" onclick="switchTab('matrix')">Matrix</button>
-        <button class="save-btn" onclick="saveHTML()">Save</button>
-      </div>
-    </div>
-    <div class="stats-row" id="stats-row"><div class="stat-pill"><span style="color:#4CAF82">●</span><b>4</b><span>Agricultural &amp; Root Ground</span></div><div class="stat-pill"><span style="color:#E07B45">●</span><b>5</b><span>Industrial &amp; Craft Engine</span></div><div class="stat-pill"><span style="color:#5BA4D4">●</span><b>6</b><span>Logistics &amp; River Spine</span></div><div class="stat-pill"><span style="color:#B07FD4">●</span><b>5</b><span>Research &amp; Mind Lab</span></div><div class="stat-pill"><span style="color:#D4A24C">●</span><b>5</b><span>Tourism &amp; Story Paths</span></div><div class="stat-pill"><b>25</b><span>projects</span></div><div class="stat-pill"><b id="tc">91</b><span>connections</span></div></div>
-  </header>
-
-  <div class="toolbar">
-    <div class="search"><span>⌕</span><input id="search" placeholder="Search projects…" oninput="renderExplorer()"></div>
-    <div class="axis-filters" id="axis-filters"><button class="axis-btn active" data-axis="ALL" onclick="setAxis('ALL')">All</button><button class="axis-btn" data-axis="agri" onclick="setAxis('agri')" style="--axis:#4CAF82;color:#4CAF82">Agricultural &amp; Root Ground</button><button class="axis-btn" data-axis="indust" onclick="setAxis('indust')" style="--axis:#E07B45;color:#E07B45">Industrial &amp; Craft Engine</button><button class="axis-btn" data-axis="logist" onclick="setAxis('logist')" style="--axis:#5BA4D4;color:#5BA4D4">Logistics &amp; River Spine</button><button class="axis-btn" data-axis="research" onclick="setAxis('research')" style="--axis:#B07FD4;color:#B07FD4">Research &amp; Mind Lab</button><button class="axis-btn" data-axis="tourism" onclick="setAxis('tourism')" style="--axis:#D4A24C;color:#D4A24C">Tourism &amp; Story Paths</button></div>
-  </div>
-
-  <section id="explorer-view" class="view active">
-    <div id="selected-panel" class="selected-panel active">
-    <div class="selected-head">
-      <div>
-        <div class="selected-kicker">P21</div>
-        <div class="selected-title">Recipro(Flow)</div>
-        <div class="tags">
-          <span class="tag" style="background:#D4A24C18;color:#D4A24C;border-color:#D4A24C40">Tourism &amp; Story Paths</span>
-          <span class="tag">Shahd Alabbasy</span>
-          <span class="tag">12 connections</span>
-        </div>
-      </div>
-      <button class="collapse-btn" onclick="event.stopPropagation();collapseProject()">Collapse project</button>
-    </div>
-    <div class="project-overview">
-      <section class="description-card">
-        <h3>Project Description</h3>
-        <p>This project acts as a cultural tourism transition hub that connects Red Sea recreation with Upper Egypt’s heritage corridor. Located near Qena and Dendera, it introduces visitors to Sa‘idi identity through museums, craft workshops, performances, hospitality, dining, and exhibitions. Inspired by weaving, the architecture translates interlaced threads into connected spaces and circulation paths, creating a cultural gateway where tourists and locals exchange traditions, crafts, and experiences.</p>
-      </section>
-      <section class="shot-card" style="--shot-color:#D4A24C">
-        <h3>Project Shot</h3>
-        <div class="shot-frame">
-          <img src="project_shots/P21.jpg" alt="Recipro(Flow) project shot">
-        </div>
-      </section>
-    </div>
-    <div class="detail-grid">
-      <section class="detail-section">
-        <div class="section-title"><span>Inputs · Receives from</span><div class="section-tools"><span class="count-badge">7</span><button class="add-conn" title="Add input connection" onclick="event.stopPropagation();openInlineAdd('in')">+</button></div></div>
-        
-        <div class="conn-list"><div class="conn-card" onclick="selectProject('P12')">
-      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(14, event); return false;">−</button>
-      <div class="arrow" style="color:#5BA4D4;background:#5BA4D416">←</div>
-      <div style="min-width:0;flex:1">
-        <div class="conn-name" style="color:#5BA4D4">P12 · Red Nile</div>
-        <div class="conn-desc"><b>Receives from</b> — Logistics connectivity enabling tourist access to Qena</div>
-      </div>
-      <div class="strength">○</div>
-    </div><div class="conn-card" onclick="selectProject('P23')">
-      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(16, event); return false;">−</button>
-      <div class="arrow" style="color:#D4A24C;background:#D4A24C16">←</div>
-      <div style="min-width:0;flex:1">
-        <div class="conn-name" style="color:#D4A24C">P23 · The Ascents</div>
-        <div class="conn-desc"><b>Receives from</b> — Shared Upper Egypt tourism corridor, tourist redirection</div>
-      </div>
-      <div class="strength">●</div>
-    </div><div class="conn-card" onclick="selectProject('P22')">
-      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(71, event); return false;">−</button>
-      <div class="arrow" style="color:#D4A24C;background:#D4A24C16">←</div>
-      <div style="min-width:0;flex:1">
-        <div class="conn-name" style="color:#D4A24C">P22 · The Common Ground</div>
-        <div class="conn-desc"><b>Receives from</b> — Shared Upper Egypt tourism corridor and tourist redirection.</div>
-      </div>
-      <div class="strength">○</div>
-    </div><div class="conn-card" onclick="selectProject('P10')">
-      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(72, event); return false;">−</button>
-      <div class="arrow" style="color:#5BA4D4;background:#5BA4D416">←</div>
-      <div style="min-width:0;flex:1">
-        <div class="conn-name" style="color:#5BA4D4">P10 · SYNTROPY</div>
-        <div class="conn-desc"><b>Receives from</b> — Chilled, sorted, and processed agricultural products for restaurants, cafés, and tourism food services.</div>
-      </div>
-      <div class="strength">○</div>
-    </div><div class="conn-card" onclick="selectProject('P18')">
-      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(73, event); return false;">−</button>
-      <div class="arrow" style="color:#B07FD4;background:#B07FD416">←</div>
-      <div style="min-width:0;flex:1">
-        <div class="conn-name" style="color:#B07FD4">P18 · Nile Helix</div>
-        <div class="conn-desc"><b>Receives from</b> — Egyptian body care products, collagen-based skincare, and promotion of local Egyptian products for tourists.</div>
-      </div>
-      <div class="strength">○</div>
-    </div><div class="conn-card" onclick="selectProject('P19')">
-      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(74, event); return false;">−</button>
-      <div class="arrow" style="color:#B07FD4;background:#B07FD416">←</div>
-      <div style="min-width:0;flex:1">
-        <div class="conn-name" style="color:#B07FD4">P19 · Cotton-to-Textile Innovation</div>
-        <div class="conn-desc"><b>Receives from</b> — Artisan feedback on textile performance, weaving insights, and craft market demands.</div>
-      </div>
-      <div class="strength">○</div>
-    </div><div class="conn-card" onclick="selectProject('P24')">
-      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(90, event); return false;">−</button>
-      <div class="arrow" style="color:#D4A24C;background:#D4A24C16">←</div>
-      <div style="min-width:0;flex:1">
-        <div class="conn-name" style="color:#D4A24C">P24 · Heritage Interpretation Center</div>
-        <div class="conn-desc"><b>Receives from</b> — Shared Upper Egypt tourism corridor and tourist redirection.</div>
-      </div>
-      <div class="strength">○</div>
-    </div></div>
-      </section>
-      <section class="detail-section">
-        <div class="section-title"><span>Outputs · Delivers to</span><div class="section-tools"><span class="count-badge">5</span><button class="add-conn" title="Add output connection" onclick="event.stopPropagation();openInlineAdd('out')">+</button></div></div>
-        
-        <div class="conn-list"><div class="conn-card" onclick="selectProject('P23')">
-      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(15, event); return false;">−</button>
-      <div class="arrow" style="color:#D4A24C;background:#D4A24C16">→</div>
-      <div style="min-width:0;flex:1">
-        <div class="conn-name" style="color:#D4A24C">P23 · The Ascents</div>
-        <div class="conn-desc"><b>Delivers to</b> — Shared Upper Egypt tourism corridor, tourist redirection</div>
-      </div>
-      <div class="strength">●</div>
-    </div><div class="conn-card" onclick="selectProject('P24')">
-      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(50, event); return false;">−</button>
-      <div class="arrow" style="color:#D4A24C;background:#D4A24C16">→</div>
-      <div style="min-width:0;flex:1">
-        <div class="conn-name" style="color:#D4A24C">P24 · Heritage Interpretation Center</div>
-        <div class="conn-desc"><b>Delivers to</b> — Tourism coordination data and visitor experience optimization insights</div>
-      </div>
-      <div class="strength">○</div>
-    </div><div class="conn-card" onclick="selectProject('P05')">
-      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(59, event); return false;">−</button>
-      <div class="arrow" style="color:#E07B45;background:#E07B4516">→</div>
-      <div style="min-width:0;flex:1">
-        <div class="conn-name" style="color:#E07B45">P05 · Fiber/Ground</div>
-        <div class="conn-desc"><b>Delivers to</b> — Visitors for production-cycle tour.</div>
-      </div>
-      <div class="strength">○</div>
-    </div><div class="conn-card" onclick="selectProject('P22')">
-      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(75, event); return false;">−</button>
-      <div class="arrow" style="color:#D4A24C;background:#D4A24C16">→</div>
-      <div style="min-width:0;flex:1">
-        <div class="conn-name" style="color:#D4A24C">P22 · The Common Ground</div>
-        <div class="conn-desc"><b>Delivers to</b> — Shared Upper Egypt tourism corridor and tourist redirection.</div>
-      </div>
-      <div class="strength">○</div>
-    </div><div class="conn-card" onclick="selectProject('P13')">
-      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(76, event); return false;">−</button>
-      <div class="arrow" style="color:#5BA4D4;background:#5BA4D416">→</div>
-      <div style="min-width:0;flex:1">
-        <div class="conn-name" style="color:#5BA4D4">P13 · Waste Collection &amp; Processing</div>
-        <div class="conn-desc"><b>Delivers to</b> — Project solid waste and ruined craft materials.</div>
-      </div>
-      <div class="strength">○</div>
-    </div></div>
-      </section>
-    </div></div>
-    <div id="empty-state" class="empty" style="display: none;"><strong>Select a project</strong>Click any card below to explore its inputs, outputs, and connection note.</div>
-    <div id="project-grid" class="project-grid">
-    <article class="project-card" onclick="selectProject('P01')">
-      <div>
-        <div class="card-top"><span class="pid">P01</span><span class="pid">15 links</span></div>
-        <div class="project-name">Nile Geo-Core</div>
-        <div class="project-meta">Mohamed Khaled</div>
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#4CAF8218;color:#4CAF82;border:1px solid #4CAF8240">Agricultural &amp; Root Ground</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P02')">
-      <div>
-        <div class="card-top"><span class="pid">P02</span><span class="pid">16 links</span></div>
-        <div class="project-name">Digital Roots</div>
-        <div class="project-meta">Sara Mohamed Ali</div>
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#4CAF8218;color:#4CAF82;border:1px solid #4CAF8240">Agricultural &amp; Root Ground</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P03')">
-      <div>
-        <div class="card-top"><span class="pid">P03</span><span class="pid">5 links</span></div>
-        <div class="project-name">Root-Link Field Stations</div>
-        
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#4CAF8218;color:#4CAF82;border:1px solid #4CAF8240">Agricultural &amp; Root Ground</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P04')">
-      <div>
-        <div class="card-top"><span class="pid">P04</span><span class="pid">4 links</span></div>
-        <div class="project-name">Smart Water Control Station</div>
-        
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#4CAF8218;color:#4CAF82;border:1px solid #4CAF8240">Agricultural &amp; Root Ground</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P05')">
-      <div>
-        <div class="card-top"><span class="pid">P05</span><span class="pid">6 links</span></div>
-        <div class="project-name">Fiber/Ground</div>
-        <div class="project-meta">Abdelrahman Yasser</div>
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#E07B4518;color:#E07B45;border:1px solid #E07B4540">Industrial &amp; Craft Engine</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P06')">
-      <div>
-        <div class="card-top"><span class="pid">P06</span><span class="pid">3 links</span></div>
-        <div class="project-name">Magnetic Commons</div>
-        <div class="project-meta">Mazen Osama</div>
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#E07B4518;color:#E07B45;border:1px solid #E07B4540">Industrial &amp; Craft Engine</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P07')">
-      <div>
-        <div class="card-top"><span class="pid">P07</span><span class="pid">6 links</span></div>
-        <div class="project-name">ReField</div>
-        <div class="project-meta">Shahd Haytham</div>
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#E07B4518;color:#E07B45;border:1px solid #E07B4540">Industrial &amp; Craft Engine</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P08')">
-      <div>
-        <div class="card-top"><span class="pid">P08</span><span class="pid">5 links</span></div>
-        <div class="project-name">Bio-Material Pilot Facility</div>
-        
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#E07B4518;color:#E07B45;border:1px solid #E07B4540">Industrial &amp; Craft Engine</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P09')">
-      <div>
-        <div class="card-top"><span class="pid">P09</span><span class="pid">4 links</span></div>
-        <div class="project-name">Agri-Tech Fabrication Foundry</div>
-        
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#E07B4518;color:#E07B45;border:1px solid #E07B4540">Industrial &amp; Craft Engine</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P10')">
-      <div>
-        <div class="card-top"><span class="pid">P10</span><span class="pid">8 links</span></div>
-        <div class="project-name">SYNTROPY</div>
-        <div class="project-meta">Reina Yasser</div>
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#5BA4D418;color:#5BA4D4;border:1px solid #5BA4D440">Logistics &amp; River Spine</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P11')">
-      <div>
-        <div class="card-top"><span class="pid">P11</span><span class="pid">10 links</span></div>
-        <div class="project-name">Logistics-South-01</div>
-        <div class="project-meta">Omar Walid</div>
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#5BA4D418;color:#5BA4D4;border:1px solid #5BA4D440">Logistics &amp; River Spine</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P12')">
-      <div>
-        <div class="card-top"><span class="pid">P12</span><span class="pid">8 links</span></div>
-        <div class="project-name">Red Nile</div>
-        <div class="project-meta">Clara George Shaker</div>
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#5BA4D418;color:#5BA4D4;border:1px solid #5BA4D440">Logistics &amp; River Spine</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P13')">
-      <div>
-        <div class="card-top"><span class="pid">P13</span><span class="pid">8 links</span></div>
-        <div class="project-name">Waste Collection &amp; Processing</div>
-        
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#5BA4D418;color:#5BA4D4;border:1px solid #5BA4D440">Logistics &amp; River Spine</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P14')">
-      <div>
-        <div class="card-top"><span class="pid">P14</span><span class="pid">6 links</span></div>
-        <div class="project-name">Distribution Hub</div>
-        
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#5BA4D418;color:#5BA4D4;border:1px solid #5BA4D440">Logistics &amp; River Spine</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P15')">
-      <div>
-        <div class="card-top"><span class="pid">P15</span><span class="pid">1 links</span></div>
-        <div class="project-name">NileFlow – Sediment Transport</div>
-        
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#5BA4D418;color:#5BA4D4;border:1px solid #5BA4D440">Logistics &amp; River Spine</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P16')">
-      <div>
-        <div class="card-top"><span class="pid">P16</span><span class="pid">6 links</span></div>
-        <div class="project-name">Nile Wheat Nexus</div>
-        <div class="project-meta">Andrew Ashraf</div>
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#B07FD418;color:#B07FD4;border:1px solid #B07FD440">Research &amp; Mind Lab</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P17')">
-      <div>
-        <div class="card-top"><span class="pid">P17</span><span class="pid">11 links</span></div>
-        <div class="project-name">Bio-Digital Nexus</div>
-        <div class="project-meta">Youstina Samy</div>
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#B07FD418;color:#B07FD4;border:1px solid #B07FD440">Research &amp; Mind Lab</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P18')">
-      <div>
-        <div class="card-top"><span class="pid">P18</span><span class="pid">11 links</span></div>
-        <div class="project-name">Nile Helix</div>
-        <div class="project-meta">Fatma Sayed</div>
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#B07FD418;color:#B07FD4;border:1px solid #B07FD440">Research &amp; Mind Lab</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P19')">
-      <div>
-        <div class="card-top"><span class="pid">P19</span><span class="pid">5 links</span></div>
-        <div class="project-name">Cotton-to-Textile Innovation</div>
-        
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#B07FD418;color:#B07FD4;border:1px solid #B07FD440">Research &amp; Mind Lab</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P20')">
-      <div>
-        <div class="card-top"><span class="pid">P20</span><span class="pid">3 links</span></div>
-        <div class="project-name">Corn &amp; Feed Systems Innovation</div>
-        
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#B07FD418;color:#B07FD4;border:1px solid #B07FD440">Research &amp; Mind Lab</span></div>
-    </article>
-    <article class="project-card active" onclick="selectProject('P21')">
-      <div>
-        <div class="card-top"><span class="pid">P21</span><span class="pid">12 links</span></div>
-        <div class="project-name">Recipro(Flow)</div>
-        <div class="project-meta">Shahd Alabbasy</div>
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#D4A24C18;color:#D4A24C;border:1px solid #D4A24C40">Tourism &amp; Story Paths</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P22')">
-      <div>
-        <div class="card-top"><span class="pid">P22</span><span class="pid">7 links</span></div>
-        <div class="project-name">The Common Ground</div>
-        <div class="project-meta">Abdelrahman Sherif</div>
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#D4A24C18;color:#D4A24C;border:1px solid #D4A24C40">Tourism &amp; Story Paths</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P23')">
-      <div>
-        <div class="card-top"><span class="pid">P23</span><span class="pid">5 links</span></div>
-        <div class="project-name">The Ascents</div>
-        <div class="project-meta">Abdelrahman Helal</div>
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#D4A24C18;color:#D4A24C;border:1px solid #D4A24C40">Tourism &amp; Story Paths</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P24')">
-      <div>
-        <div class="card-top"><span class="pid">P24</span><span class="pid">10 links</span></div>
-        <div class="project-name">Heritage Interpretation Center</div>
-        
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#D4A24C18;color:#D4A24C;border:1px solid #D4A24C40">Tourism &amp; Story Paths</span></div>
-    </article>
-    <article class="project-card" onclick="selectProject('P25')">
-      <div>
-        <div class="card-top"><span class="pid">P25</span><span class="pid">7 links</span></div>
-        <div class="project-name">Artisan Village &amp; Craft Hub</div>
-        
-      </div>
-      <div class="card-bottom"><span class="axis-chip" style="background:#D4A24C18;color:#D4A24C;border:1px solid #D4A24C40">Tourism &amp; Story Paths</span></div>
-    </article></div>
-  </section>
-
-  <section id="matrix-view" class="view">
-    <div class="matrix-title"><div><h2>Connection Matrix</h2><p>Symmetric relationship view · diagonal cells combine the two connected axes’ colors.</p></div></div>
-    <div class="matrix-layout">
-      <div class="matrix-card" id="matrix-card"></div>
-      <aside class="legend" id="matrix-legend"></aside>
-    </div>
-  </section>
-
-  <section id="add-view" class="view">
-    <div class="form-wrap">
-      <div class="form-title">Add Connection</div>
-      <div class="form-sub">New connections update the Explorer and Matrix live in this session.</div>
-      <div class="form-grid">
-        <div class="fg"><label>From</label><select id="af"><option value="P01">P01 — Nile Geo-Core</option><option value="P02">P02 — Digital Roots</option><option value="P03">P03 — Root-Link Field Stations</option><option value="P04">P04 — Smart Water Control Station</option><option value="P05">P05 — Fiber/Ground</option><option value="P06">P06 — Magnetic Commons</option><option value="P07">P07 — ReField</option><option value="P08">P08 — Bio-Material Pilot Facility</option><option value="P09">P09 — Agri-Tech Fabrication Foundry</option><option value="P10">P10 — SYNTROPY</option><option value="P11">P11 — Logistics-South-01</option><option value="P12">P12 — Red Nile</option><option value="P13">P13 — Waste Collection &amp; Processing</option><option value="P14">P14 — Distribution Hub</option><option value="P15">P15 — NileFlow – Sediment Transport</option><option value="P16">P16 — Nile Wheat Nexus</option><option value="P17">P17 — Bio-Digital Nexus</option><option value="P18">P18 — Nile Helix</option><option value="P19">P19 — Cotton-to-Textile Innovation</option><option value="P20">P20 — Corn &amp; Feed Systems Innovation</option><option value="P21">P21 — Recipro(Flow)</option><option value="P22">P22 — The Common Ground</option><option value="P23">P23 — The Ascents</option><option value="P24">P24 — Heritage Interpretation Center</option><option value="P25">P25 — Artisan Village &amp; Craft Hub</option></select></div>
-        <div class="fg"><label>To</label><select id="at"><option value="P01">P01 — Nile Geo-Core</option><option value="P02">P02 — Digital Roots</option><option value="P03">P03 — Root-Link Field Stations</option><option value="P04">P04 — Smart Water Control Station</option><option value="P05">P05 — Fiber/Ground</option><option value="P06">P06 — Magnetic Commons</option><option value="P07">P07 — ReField</option><option value="P08">P08 — Bio-Material Pilot Facility</option><option value="P09">P09 — Agri-Tech Fabrication Foundry</option><option value="P10">P10 — SYNTROPY</option><option value="P11">P11 — Logistics-South-01</option><option value="P12">P12 — Red Nile</option><option value="P13">P13 — Waste Collection &amp; Processing</option><option value="P14">P14 — Distribution Hub</option><option value="P15">P15 — NileFlow – Sediment Transport</option><option value="P16">P16 — Nile Wheat Nexus</option><option value="P17">P17 — Bio-Digital Nexus</option><option value="P18">P18 — Nile Helix</option><option value="P19">P19 — Cotton-to-Textile Innovation</option><option value="P20">P20 — Corn &amp; Feed Systems Innovation</option><option value="P21">P21 — Recipro(Flow)</option><option value="P22">P22 — The Common Ground</option><option value="P23">P23 — The Ascents</option><option value="P24">P24 — Heritage Interpretation Center</option><option value="P25">P25 — Artisan Village &amp; Craft Hub</option></select></div>
-        <div class="fg full"><label>What flows</label><textarea id="ad" placeholder="Describe what moves between the two projects…"></textarea></div>
-        <div class="fg full"><label>Strength</label><div class="strength-row"><button class="strength-opt sel" data-str="●" onclick="pickStr(this)">● Strong</button><button class="strength-opt" data-str="○" onclick="pickStr(this)">○ Moderate</button></div></div>
-      </div>
-      <button class="primary-btn" onclick="addConn()">Add Connection</button>
-      <div class="ok" id="aok">✓ Connection added</div>
-      <div class="added-list" id="ul"></div>
-    </div>
-  </section>
+<header>
+<div class="header-row">
+<div class="brand">
+<div class="logo-mark">N50</div>
+<div>
+<h1>NILE 2050 Connection Explorer</h1>
+<div class="sub">Project network dashboard · redesigned from content only</div>
 </div>
-
+</div>
+<div class="tabs">
+<button class="tab active" onclick="switchTab('explorer')">Explorer</button>
+<button class="tab" onclick="switchTab('matrix')">Matrix</button>
+<button class="tab" onclick="switchTab('map')">Map</button>
+<button class="save-btn" onclick="saveHTML()">Save</button>
+</div>
+</div>
+<div class="stats-row" id="stats-row"></div>
+</header>
+<div class="toolbar">
+<div class="search"><span>⌕</span><input id="search" oninput="renderExplorer()" placeholder="Search projects…"/></div>
+<div class="axis-filters" id="axis-filters"></div>
+</div>
+<section class="view active" id="explorer-view">
+<div class="selected-panel" id="selected-panel"></div>
+<div class="empty" id="empty-state" style=""><strong>Select a project</strong>Click any card below to explore its inputs, outputs, and connection note.</div>
+<div class="project-grid" id="project-grid"></div>
+</section>
+<section class="view" id="matrix-view">
+<div class="matrix-title"><div><h2>Connection Matrix</h2><p>Symmetric relationship view · diagonal cells combine the two connected axes’ colors.</p></div></div>
+<div class="matrix-layout">
+<div class="matrix-card" id="matrix-card"></div>
+<aside class="legend" id="matrix-legend"></aside>
+</div>
+</section>
+<section class="view" id="map-view">
+<div class="map-title"><div><h2>Project Map</h2><p>Interactive geographic view of the 24 projects. Click a project marker to highlight its direct network and fade unrelated projects.</p></div><div class="map-controls"><button class="map-toggle" id="all-connections-toggle" onclick="toggleAllMapConnections()">Show all connections</button><button class="map-reset-soft" onclick="clearMapSelection()">Reset map</button></div></div>
+<div class="map-layout">
+<div class="map-card"><div id="nile-map"></div></div>
+<aside class="map-side" id="map-info"></aside>
+</div>
+</section>
+<section class="view" id="add-view">
+<div class="form-wrap">
+<div class="form-title">Add Connection</div>
+<div class="form-sub">New connections update the Explorer and Matrix live in this session.</div>
+<div class="form-grid">
+<div class="fg"><label>From</label><select id="af"></select></div>
+<div class="fg"><label>To</label><select id="at"></select></div>
+<div class="fg full"><label>What flows</label><textarea id="ad" placeholder="Describe what moves between the two projects…"></textarea></div>
+<div class="fg full"><label>Strength</label><div class="strength-row"><button class="strength-opt sel" data-str="●" onclick="pickStr(this)">● Strong</button><button class="strength-opt" data-str="○" onclick="pickStr(this)">○ Moderate</button></div></div>
+</div>
+<button class="primary-btn" onclick="addConn()">Add Connection</button>
+<div class="ok" id="aok">✓ Connection added</div>
+<div class="added-list" id="ul"></div>
+</div>
+</section>
+</div>
 <script>
 const AX={agri:{l:'Agricultural & Root Ground',c:'#4CAF82'},indust:{l:'Industrial & Craft Engine',c:'#E07B45'},logist:{l:'Logistics & River Spine',c:'#5BA4D4'},research:{l:'Research & Mind Lab',c:'#B07FD4'},tourism:{l:'Tourism & Story Paths',c:'#D4A24C'}};
 // Add project shot file paths here when final images are ready. Shots appear only for projects that have student names.
@@ -574,210 +308,372 @@ const PROJECT_SHOTS={
   P10: "project_shots/P10.jpg",
   P11: "project_shots/P11.jpg",
   P12: "project_shots/P12.jpg",
+  P15: "project_shots/P15.jpg",
   P16: "project_shots/P16.jpg",
   P17: "project_shots/P17.jpg",
-  P18: "project_shots/P18.jpg",
+  P20: "project_shots/P20.jpg",
   P21: "project_shots/P21.jpg",
-  P22: "project_shots/P22.jpg",
-  P23: "project_shots/P23.jpg",
+  P22: "project_shots/P22.jpg"
 };
 const PROJECT_LOCATIONS={
-  "P01": {
-    "place": "Biba, Beni Suef Governorate",
-    "context": "Nile Geo-Core site for seed preservation, genomic research, and floodplain cultivation systems.",
-    "coords": "28.903953, 30.993299"
+  P01: {
+    place: "Biba, Beni Suef Governorate",
+    context: "Nile Geo-Core site for seed preservation, genomic research, and floodplain cultivation systems.",
+    coords: "28.903953, 30.993299"
   },
-  "P02": {
-    "place": "Gazirat Sharunah, Maghagha, Minya Governorate",
-    "context": "Digital Roots campus serving the agricultural communities of Maghagha and the surrounding Nile floodplain.",
-    "coords": "28.637353, 30.846514"
+  P02: {
+    place: "Gazirat Sharunah, Maghagha, Minya Governorate",
+    context: "Digital Roots campus serving the agricultural communities of Maghagha and the surrounding Nile floodplain.",
+    coords: "28.637353, 30.846514"
   },
-  "P03": {
-    "place": "Beni Mazar, Minya Governorate",
-    "context": "Satellite extension of Digital Roots serving dense smallholder farming communities on the Minya west bank and linking field trials back to the wider agricultural network.",
-    "coords": "28.55, 30.82"
+  P03: {
+    place: "Beni Mazar, Minya Governorate",
+    context: "Root-Link Field Stations positioned in Beni Mazar to serve Minya smallholder farming communities and connect field trials back to Digital Roots and Nile Geo-Core.",
+    coords: "28.503314, 30.818682"
   },
-  "P04": {
-    "place": "Gazirat Sharunah, Maghagha, Minya Governorate",
-    "context": "Co-located with Digital Roots as the physical execution arm for Ibrahimiya Canal water delivery and SCADA feedback.",
-    "coords": "28.637, 30.848"
+  P04: {
+    place: "Minya City Nile Bank, Minya Governorate",
+    context: "Smart Water Station located on the Minya Nile bank as the physical execution arm of Digital Roots, controlling canal delivery and feeding SCADA water data back into the agricultural network.",
+    coords: "28.087807, 30.773124"
   },
-  "P05": {
-    "place": "Dandarah / Qena Governorate",
-    "context": "Fiber/Ground site within the sugarcane production landscape of Qena.",
-    "coords": "26.169367, 32.626375"
+  P05: {
+    place: "Dandarah / Qena Governorate",
+    context: "Fiber/Ground site within the sugarcane production landscape of Qena.",
+    coords: "26.169367, 32.626375"
   },
-  "P06": {
-    "place": "Rosetta / Rashid, Beheira Governorate",
-    "context": "Magnetic Commons industrial destination connected to black sand processing and magnetic material production.",
-    "coords": "31.437238, 30.416267"
+  P06: {
+    place: "Rosetta / Rashid, Beheira Governorate",
+    context: "Magnetic Commons industrial destination connected to black sand processing and magnetic material production.",
+    coords: "31.437238, 30.416267"
   },
-  "P07": {
-    "place": "Daqahlia Governorate, Nile Delta",
-    "context": "ReField site within the rice-straw landscape of the Delta, supporting bio-composite material development.",
-    "coords": "31°10'56.07\"N, 31°32'37.33\"E"
+  P07: {
+    place: "Daqahlia Governorate, Nile Delta",
+    context: "ReField site within the rice-straw landscape of the Delta, supporting bio-composite material development.",
+    coords: "31°10'56.07\"N, 31°32'37.33\"E"
   },
-  "P08": {
-    "place": "Damanhour, Beheira Governorate",
-    "context": "Bio-Material Pilot Facility located in Beheira’s administrative and industrial capital, positioned for clinical evaluation links with regional university and hospital networks.",
-    "coords": "30.47, 30.47"
+  P08: {
+    place: "Kafr El-Dawar, Beheira Governorate",
+    context: "Bio-Material Pilot Facility located in Kafr El-Dawar within Beheira’s industrial belt, supporting biomaterial prototyping, production testing, and links to nearby clinical evaluation networks.",
+    coords: "31.030607, 30.719050"
   },
-  "P09": {
-    "place": "Giza Governorate",
-    "context": "Co-located with the Bio-Digital Nexus to fabricate hydroponic racks, precision LED systems, IoT sensors, and agricultural hardware designed by the research campus.",
-    "coords": "29.803, 31.291"
+  P09: {
+    place: "El Ayat, Giza Governorate — Nile Bank",
+    context: "Agri-Tech Foundry positioned on the Nile bank at El Ayat, Giza, to fabricate agricultural hardware, hydroponic systems, LED systems, and IoT tools for the Bio-Digital Nexus and wider farming network.",
+    coords: "29.621706, 31.263941"
   },
-  "P10": {
-    "place": "Al Briegat, Kom Hamada, Beheira Governorate",
-    "context": "SYNTROPY cold-corridor logistics site connected to Beheira’s agricultural production belt.",
-    "coords": "30.495202, 30.830825"
+  P10: {
+    place: "Al Briegat, Kom Hamada, Beheira Governorate",
+    context: "SYNTROPY cold-corridor logistics site connected to Beheira’s agricultural production belt.",
+    coords: "30.495202, 30.830825"
   },
-  "P11": {
-    "place": "Abu Simbel, Aswan Governorate",
-    "context": "Logistics-South-01 southern gateway linking Nile logistics with African import and export flows.",
-    "coords": "22.361244, 31.637591"
+  P11: {
+    place: "Abu Simbel, Aswan Governorate",
+    context: "Logistics-South-01 southern gateway linking Nile logistics with African import and export flows.",
+    coords: "22.361244, 31.637591"
   },
-  "P12": {
-    "place": "El Taramsah, Qena Governorate",
-    "context": "Red Nile logistics hub positioned near Qena’s Nile and Red Sea corridor connection.",
-    "coords": "26.14193985, 32.71426376"
+  P12: {
+    place: "El Taramsah, Qena Governorate",
+    context: "Red Nile logistics hub positioned near Qena’s Nile and Red Sea corridor connection.",
+    coords: "26.14193985, 32.71426376"
   },
-  "P13": {
-    "place": "Kafr El-Zayat, Gharbia Governorate",
-    "context": "Waste Collection Centre positioned on the Rosetta branch near industrial infrastructure, serving as a midpoint between major agricultural, research, and material-waste sources.",
-    "coords": "30.82, 30.81"
+  P13: {
+    place: "Gharbia Governorate — Nile Bank",
+    context: "Waste Collection Centre located on the Nile bank in Gharbia to aggregate agricultural waste streams from nearby Delta and Beheira production sources and route them into industrial and research reuse chains.",
+    coords: "30.820146, 30.761593"
   },
-  "P14": {
-    "place": "Beni Suef Governorate",
-    "context": "Distribution Hub positioned on the Nile to support biomedical and material product movement between southern production sources and Cairo-region hospitals and markets.",
-    "coords": "29.072, 31.1"
+  P14: {
+    place: "Beni Suef Nile Bank, Beni Suef Governorate",
+    context: "Distribution Hub positioned on the Beni Suef Nile bank to connect biomedical and material products with hospitals, markets, and regional logistics corridors.",
+    coords: "29.055286, 31.090282"
   },
-  "P15": {
-    "place": "Abu Simbel, Aswan Governorate",
-    "context": "Co-located with Logistics-South-01 to use southern Nile barge infrastructure and sediment-rich conditions near the Aswan High Dam system.",
-    "coords": "22.362, 31.638"
+  P15: {
+    place: "Shabour, Al-Beheira Governorate",
+    context: "Nile Wheat Nexus research campus within a wheat and agricultural production context.",
+    coords: "30.821003, 30.809704"
   },
-  "P16": {
-    "place": "Shabour, Al-Beheira Governorate",
-    "context": "Nile Wheat Nexus research campus within a wheat and agricultural production context.",
-    "coords": "30.821003, 30.809704"
+  P16: {
+    place: "Giza Governorate",
+    context: "Bio-Digital Nexus site connected to Nile island, floodplain, and urban food-production systems.",
+    coords: "29.803458, 31.292956"
   },
-  "P17": {
-    "place": "Giza Governorate",
-    "context": "Bio-Digital Nexus site connected to Nile island, floodplain, and urban food-production systems.",
-    "coords": "29.803458, 31.292956"
+  P17: {
+    place: "Beheira Governorate, Nile Delta",
+    context: "Nile Helix biotechnology hub located within the northern Delta fishery and agricultural landscape.",
+    coords: "30.727665, 30.768811"
   },
-  "P18": {
-    "place": "Beheira Governorate, Nile Delta",
-    "context": "Nile Helix biotechnology hub located within the northern Delta fishery and agricultural landscape.",
-    "coords": "30.727665, 30.768811"
+  P18: {
+    place: "Dasouq, Kafr El Sheikh Governorate",
+    context: "Cotton-to-Textile Centre located in Dasouq within Kafr El Sheikh’s cotton and Delta production landscape, supporting textile prototyping, cotton waste reuse, and links to nearby bio-composite systems.",
+    coords: "31.116779, 30.653314"
   },
-  "P19": {
-    "place": "Kafr El Sheikh Governorate",
-    "context": "Cotton-to-Textile Centre located in Egypt’s major cotton-production landscape, connected to cotton-processing, rice-strawboard, and bio-composite material networks.",
-    "coords": "31.107, 30.94"
+  P19: {
+    place: "El Fashn, Beni Suef Governorate",
+    context: "Corn & Feed Innovation located in El Fashn to support corn research, feed-system testing, stalk-waste protocols, and agricultural knowledge exchange with Beni Suef and Minya projects.",
+    coords: "28.295840, 30.740579"
   },
-  "P20": {
-    "place": "Biba, Beni Suef Governorate",
-    "context": "Co-located with Nile Geo-Core to support on-site genetic feedback loops, corn research, feed-system innovation, and stalk-waste protocols.",
-    "coords": "28.904, 30.994"
+  P20: {
+    place: "Qena Governorate",
+    context: "Recipro(Flow) cultural tourism gateway connecting Red Sea recreation with the Upper Egypt heritage corridor.",
+    coords: "26°08'44.68\"N, 32°36'55.98\"E"
   },
-  "P21": {
-    "place": "Qena Governorate",
-    "context": "Recipro(Flow) cultural tourism gateway connecting Red Sea recreation with the Upper Egypt heritage corridor.",
-    "coords": "26°08'44.68\"N, 32°36'55.98\"E"
+  P21: {
+    place: "Wasta, Beni Suef Governorate",
+    context: "The Common Ground agrotourism destination connected to medicinal plants, local markets, and Nile-edge landscapes.",
+    coords: "29.3520136, 31.2211248"
   },
-  "P22": {
-    "place": "Wasta, Beni Suef Governorate",
-    "context": "The Common Ground agrotourism destination connected to medicinal plants, local markets, and Nile-edge landscapes.",
-    "coords": "29.3520136, 31.2211248"
+  P22: {
+    place: "Sohag Governorate",
+    context: "The Ascents vertical tourism network linking floodplain, river islands, cliff edges, and desert high points.",
+    coords: "26.367938, 31.885430"
   },
-  "P23": {
-    "place": "Sohag Governorate",
-    "context": "The Ascents vertical tourism network linking floodplain, river islands, cliff edges, and desert high points.",
-    "coords": "26.367938, 31.885430"
+  P23: {
+    place: "Nag Hammadi, Qena Governorate",
+    context: "Heritage Interpretation Centre relocated to Nag Hammadi to connect Qena heritage, tourism routes, cultural interpretation, and Nile-side visitor movement across the Upper Egypt network.",
+    coords: "26.05, 32.25"
   },
-  "P24": {
-    "place": "Dendera, Qena Governorate",
-    "context": "Heritage Interpretation Centre positioned near Dendera Temple and the Qena west bank to connect Red Nile, Recipro(Flow), and cross-Nile cultural visitor flows.",
-    "coords": "26.143, 32.671"
-  },
-  "P25": {
-    "place": "Sohag west bank, Sohag Governorate",
-    "context": "Artisan Village located beside The Ascents in a Sa’eedi craft region, linking hand-weaving heritage with bio-composite materials, seed varieties, and tourism flows.",
-    "coords": "26.368, 31.886"
+  P24: {
+    place: "Akhmim, Sohag Governorate",
+    context: "Artisan Village located in Akhmim, Sohag, a strong craft context for linking local making, hand-weaving traditions, tourism flows, and material inputs from the wider Nile 2050 network.",
+    coords: "26.559947, 31.748797"
   }
 };
 
 const P=[
-  {id:'P01', n:'Nile Geo-Core',ax:'agri',s:'Mohamed Khaled',o:true,note:"The Nile Geo-Core is a bio-infrastructure campus designed to protect Egypt’s food sovereignty through seed preservation, genomic engineering, and living biome cultivation. It combines a monumental seed vault, research laboratories, agricultural heritage museum, and automated logistics system. The project connects floodplain cultivation zones to deep preservation facilities and national food security programs. By merging science, education, and infrastructure, it creates a powerful architectural system for protecting biodiversity and developing climate-resilient crops."},
-  {id:'P02', n:'Digital Roots',ax:'agri',s:'Sara Mohamed Ali',o:true,note:"This project is a hybrid educational academy and agricultural knowledge hub designed for Maghagha’s farming community. It responds to low incomes, low crop yields, water waste, and seasonal flooding by combining research, training, testing fields, exhibitions, and public learning spaces. The campus adapts to the Nile floodplain while translating advanced agricultural data into practical farmer education. Its goal is to create a continuous cycle between research, cultivation, community awareness, and regional resilience."},
-  {id:'P03', n:'Root-Link Field Stations',ax:'agri',s:null,o:false,note:"Root-Link Field Stations act as satellite agricultural learning and testing nodes connected to Digital Roots and Nile Geo-Core. They bring advanced farming knowledge, climate-adapted seeds, and digital consultation tools directly to remote farming communities. At the same time, they collect real field data from different floodplain conditions, including crop performance, soil response, and farmers’ needs. This makes them a bridge between centralized research and everyday agricultural practice, turning isolated farms into active contributors to the Nile 2050 knowledge network."},
-  {id:'P04', n:'Smart Water Control Station',ax:'agri',s:null,o:false,note:"The Smart Water Control Station is the operational water-management arm of the agricultural network. It translates soil moisture data, crop water demand, and irrigation schedules into controlled water delivery across canals and farming areas. By using automation, monitoring systems, and real-time feedback, it reduces water waste and improves crop reliability. It also supports other advanced farming projects, such as vertical farming systems, by sharing irrigation-control expertise and water-performance data within the wider Nile 2050 system."},
-  {id:'P05', n:'Fiber/Ground',ax:'indust',s:'Abdelrahman Yasser',o:true,note:"The Agro-Fiber Material Innovation Campus in Dandarah, Qena transforms sugarcane bagasse waste into compressed construction panels for affordable rural housing. The project combines a production facility, research center, prototype housing village, and flood-adaptive Nile pavilion. Organized by a moisture gradient from river edge to dry land, the campus responds to seasonal flooding while proving that agricultural waste can become a reliable local building material. It links farming, industry, housing, and environmental adaptation."},
-  {id:'P06', n:'Magnetic Commons',ax:'indust',s:'Mazen Osama',o:true,note:"This project transforms a black sand processing and magnet manufacturing factory into an interactive industrial destination. Instead of being a closed production facility, it allows visitors to experience the journey of black sand as it becomes valuable magnetic materials. A fluid public path moves through organized industrial zones, while a kinetic roof responds to light, ventilation, and occupancy. The project combines production, research, education, exhibition, retail, and dining into a new civic model for industrial architecture."},
-  {id:'P07', n:'ReField',ax:'indust',s:'Shahd Haytham',o:true,note:"This project transforms rice straw waste from the Nile Delta into modular bio-composite building systems. Located between the mainland and a floodplain island, it combines material processing, digital fabrication, research, and public interaction. The mainland contains production and development facilities, while the island becomes a testing landscape for assembling and experiencing the modular systems. The project redefines recycling as an architectural infrastructure that connects industry, ecology, circular construction, and community awareness."},
-  {id:'P08', n:'Bio-Material Pilot Facility',ax:'indust',s:null,o:false,note:"The Bio-Material Pilot Facility transforms biological research into practical biomedical and material products. It receives validated bio-formulations from Nile Helix and processed agricultural biomass from the waste network, then converts them into experimental materials ready for testing, evaluation, and distribution. The facility works as a bridge between laboratory research and real-world production, allowing new bio-based products to be prototyped, refined, and scaled. Its feedback loop helps research projects improve their formulas based on manufacturing and performance results."},
-  {id:'P09', n:'Agri-Tech Fabrication Foundry',ax:'indust',s:null,o:false,note:"The Agri-Tech Fabrication Foundry is a manufacturing hub for precision agriculture and vertical farming technologies. It produces hydroponic racks, LED systems, sensors, and robotic components based on specifications from the Bio-Digital Nexus. It also supports Digital Roots by supplying agricultural IoT tools and demonstration equipment. By linking research, fabrication, and farming practice, the foundry turns digital agricultural ideas into physical systems that can be tested, distributed, and improved across the Nile 2050 network."},
-  {id:'P10', n:'SYNTROPY',ax:'logist',s:'Reina Yasser',o:true,note:"Syntropy is an agricultural logistics project that aims to reduce fragmentation in Egypt’s crop value chain. It focuses on solving post-harvest loss and inefficient transportation by repositioning the Nile as a main corridor for moving high-value crops such as citrus and vegetables. Through a “farm-to-global” workflow, the project connects local farms to national and international markets using a seamless, technology-supported logistics system that improves speed, quality, and economic value."},
-  {id:'P11', n:'Logistics-South-01',ax:'logist',s:'Omar Walid',o:true,note:"Logistics-South-01 is a futuristic logistics megastructure designed to revive the Nile floodplains as productive economic infrastructure. It connects river barges, railways, electric trucks, sorting systems, cold-chain storage, distribution, data control, and public markets into one integrated hub. Supported by renewable energy, digital tracking, and a logistics academy, the project reduces post-harvest losses and improves farmers’ access to markets. It reimagines the Nile as a modern commercial lifeline for Egypt’s agricultural future."},
-  {id:'P12', n:'Red Nile',ax:'logist',s:'Clara George Shaker',o:true,note:"The RedNile Logistical Hub is a logistics and marketing facility proposed on Qena’s West Bank floodplain. The project takes advantage of Qena’s strategic position near the Red Sea corridor, the Nile, and the emerging Golden Triangle development. It provides a specialized platform for processing, marketing, distributing, and exporting regional products and materials. By activating unused floodplain land, the hub connects local production to central Egypt, Upper Egypt, and wider Nile basin markets."},
-  {id:'P13', n:'Waste Collection & Processing',ax:'logist',s:null,o:false,note:"Waste Collection & Processing acts as the material-aggregation node of the network. It collects agricultural residues, organic runoff, biomass, and by-products from farming and production systems, then stabilizes and prepares them for reuse. These materials feed into bio-composite production, biomedical research, and waste-to-value industries. By coordinating with logistics projects such as SYNTROPY, it turns scattered waste streams into organized resources, reducing environmental pressure while supporting circular production across agricultural, industrial, and research axes."},
-  {id:'P14', n:'Distribution Hub',ax:'logist',s:null,o:false,note:"The Distribution Hub supports the movement of finished biomedical and material products from pilot production facilities to hospitals, markets, and institutional users. It connects manufacturing outputs with real-world evaluation, making sure products are not only produced but also tested through actual use. The hub also returns performance data to research centers such as Nile Helix, creating a feedback loop between users, healthcare systems, and innovation labs. It functions as the commercial and logistical platform for applied biomedical outputs."},
-  {id:'P15', n:'NileFlow – Sediment Transport',ax:'logist',s:null,o:false,note:"NileFlow – Sediment Transport is a specialized river logistics system focused on collecting, moving, and studying Nile sediments. It supplies floodplain soil samples to agricultural and genetic research projects, helping them understand soil enrichment, fertility, and environmental change. Rather than treating sediment as a passive natural process, the project turns it into a managed resource within the Nile 2050 network. It connects river dynamics with agriculture, research, and land-restoration strategies through controlled transport and data collection."},
-  {id:'P16',n:'Nile Wheat Nexus',ax:'research',s:'Andrew Ashraf',o:true,note:"Nile Wheat Nexus is an urban-scale research and demonstration campus focused on strengthening Egypt’s wheat resilience. It connects scientific research, pilot testing, training, certification, policy support, and public communication into one integrated system. The project studies real problems from farms, silos, mills, and bakeries, then transforms findings into practical protocols, standards, dashboards, and training programs. Through organized zoning and separated flows, it supports a complete seed-to-bread improvement pipeline."},
-  {id:'P17',n:'Bio-Digital Nexus',ax:'research',s:'Youstina Samy',o:true,note:"This project merges vertical farming, scientific research, and public education within one unified architectural form. High-rise towers support food production and data storage, while connected laboratories and irrigation research centers develop new agricultural methods. The project creates a direct relationship between cultivation, experimentation, technology, and learning. By combining productive farming systems with research and public engagement, it proposes an architectural model for future food security and sustainable urban agriculture."},
-  {id:'P18',n:'Nile Helix',ax:'research',s:'Fatma Sayed',o:true,note:"Nile Helix is a regenerative biotechnology hub inspired by the triple helix structure of collagen fibers. The project uses Egypt’s fishery resources to extract collagen for medical and cosmetic applications, linking production, research, and administration through one continuous process. Raw materials are transformed into biomaterials, tested in laboratories, and developed into useful products. The project supports Egyptian biomedical innovation while exploring how architecture can express connection, growth, and scientific transformation."},
-  {id:'P19', n:'Cotton-to-Textile Innovation',ax:'research',s:null,o:false,note:"Cotton-to-Textile Innovation transforms Egyptian cotton from a raw agricultural product into a research, design, and market-driven system. It develops textile prototypes, studies natural dye formulations, and connects technical research with artisan feedback. The project sends finished products through logistics hubs for distribution while redirecting cotton waste into bio-composite material production. It creates a circular relationship between agriculture, craft, industry, and export, positioning cotton as both a cultural material and a modern innovation platform."},
-  {id:'P20', n:'Corn & Feed Systems Innovation',ax:'research',s:null,o:false,note:"Corn & Feed Systems Innovation focuses on improving corn production and animal feed supply chains through applied research, crop testing, and waste-to-value strategies. It connects Nile Geo-Core’s genetic resources with Digital Roots’ agricultural data systems, helping develop heat-tolerant and efficient corn varieties. The project also studies corn stalks, silage quality, and feed-processing protocols, linking agriculture to livestock productivity and waste-processing networks. It strengthens food security by treating corn as both a crop and an industrial resource."},
-  {id:'P21', n:'Recipro(Flow)',ax:'tourism',s:'Shahd Alabbasy',o:true,note:"This project acts as a cultural tourism transition hub that connects Red Sea recreation with Upper Egypt’s heritage corridor. Located near Qena and Dendera, it introduces visitors to Sa‘idi identity through museums, craft workshops, performances, hospitality, dining, and exhibitions. Inspired by weaving, the architecture translates interlaced threads into connected spaces and circulation paths, creating a cultural gateway where tourists and locals exchange traditions, crafts, and experiences."},
-  {id:'P22',n:'The Common Ground',ax:'tourism',s:'Abdelrahman Sherif',o:true,note:"The Common Ground is a sensory agrotourism destination that turns agriculture into a public cultural experience. Through medicinal and aromatic plant fields, local markets, workshops, hospitality spaces, and Nile-edge landscapes, the project reconnects visitors with farming, production, local identity, and the river. It creates a place where agriculture is not only seen as work, but also as education, tourism, wellness, and community interaction rooted in the landscape."},
-  {id:'P23',n:'The Ascents',ax:'tourism',s:'Abdelrahman Helal',o:true,note:"The Ascents is a vertical cultural and tourism network that connects the Nile floodplain, river islands, cliff edges, and desert summit. It uses cable cars, panoramic elevators, cliff hospitality pods, cultural campuses, craft zones, media production spaces, amusement areas, and observation platforms to create a layered journey from water to sky. The project protects agricultural land by building within the vertical desert, turning overlooked cliffs and islands into a high-tech cultural destination."},
-  {id:'P24',n:'Heritage Interpretation Center',ax:'tourism',s:null,o:false,note:"The Heritage Interpretation Center is the storytelling and knowledge-display hub of the Nile 2050 network. It gathers outputs, visitor data, technologies, and cultural narratives from agriculture, industry, logistics, research, and tourism projects, then translates them into public exhibitions and educational experiences. It helps visitors understand how the separate projects form one connected national system. The center also redirects visitors toward farms, craft hubs, and tourism routes, making heritage an active connector rather than a static display."},
-  {id:'P25',n:'Artisan Village & Craft Hub',ax:'tourism',s:null,o:false,note:"The Artisan Village & Craft Hub supports local craft economies by connecting traditional making with materials, tourism, and research. It receives bio-composite materials, natural dye crops, cotton textile prototypes, and visitor flows from across the network. In return, it provides artisan feedback, craft knowledge, market insight, and cultural products to tourism and research projects. The village preserves traditional skills while integrating them into a contemporary production system, allowing craft to become both a cultural experience and an economic engine."}
+  {
+    id: "P01",
+    n: "Nile Geo-Core",
+    ax: "agri",
+    s: "Mohamed Khaled",
+    o: true,
+    note: "The Nile Geo-Core is a bio-infrastructure campus designed to protect Egypt’s food sovereignty through seed preservation, genomic engineering, and living biome cultivation. It combines a monumental seed vault, research laboratories, agricultural heritage museum, and automated logistics system. The project connects floodplain cultivation zones to deep preservation facilities and national food security programs. By merging science, education, and infrastructure, it creates a powerful architectural system for protecting biodiversity and developing climate-resilient crops."
+  },
+  {
+    id: "P02",
+    n: "Digital Roots",
+    ax: "agri",
+    s: "Sara Mohamed Ali",
+    o: true,
+    note: "This project is a hybrid educational academy and agricultural knowledge hub designed for Maghagha’s farming community. It responds to low incomes, low crop yields, water waste, and seasonal flooding by combining research, training, testing fields, exhibitions, and public learning spaces. The campus adapts to the Nile floodplain while translating advanced agricultural data into practical farmer education. Its goal is to create a continuous cycle between research, cultivation, community awareness, and regional resilience."
+  },
+  {
+    id: "P03",
+    n: "Root-Link Field Stations",
+    ax: "agri",
+    s: null,
+    o: false,
+    note: "Root-Link Field Stations act as satellite agricultural learning and testing nodes connected to Digital Roots and Nile Geo-Core. They bring advanced farming knowledge, climate-adapted seeds, and digital consultation tools directly to remote farming communities. At the same time, they collect real field data from different floodplain conditions, including crop performance, soil response, and farmers’ needs. This makes them a bridge between centralized research and everyday agricultural practice, turning isolated farms into active contributors to the Nile 2050 knowledge network."
+  },
+  {
+    id: "P04",
+    n: "Smart Water Control Station",
+    ax: "agri",
+    s: null,
+    o: false,
+    note: "The Smart Water Control Station is the operational water-management arm of the agricultural network. It translates soil moisture data, crop water demand, and irrigation schedules into controlled water delivery across canals and farming areas. By using automation, monitoring systems, and real-time feedback, it reduces water waste and improves crop reliability. It also supports other advanced farming projects, such as vertical farming systems, by sharing irrigation-control expertise and water-performance data within the wider Nile 2050 system."
+  },
+  {
+    id: "P05",
+    n: "Fiber/Ground",
+    ax: "indust",
+    s: "Abdelrahman Yasser",
+    o: true,
+    note: "The Agro-Fiber Material Innovation Campus in Dandarah, Qena transforms sugarcane bagasse waste into compressed construction panels for affordable rural housing. The project combines a production facility, research center, prototype housing village, and flood-adaptive Nile pavilion. Organized by a moisture gradient from river edge to dry land, the campus responds to seasonal flooding while proving that agricultural waste can become a reliable local building material. It links farming, industry, housing, and environmental adaptation."
+  },
+  {
+    id: "P06",
+    n: "Magnetic Commons",
+    ax: "indust",
+    s: "Mazen Osama",
+    o: true,
+    note: "This project transforms a black sand processing and magnet manufacturing factory into an interactive industrial destination. Instead of being a closed production facility, it allows visitors to experience the journey of black sand as it becomes valuable magnetic materials. A fluid public path moves through organized industrial zones, while a kinetic roof responds to light, ventilation, and occupancy. The project combines production, research, education, exhibition, retail, and dining into a new civic model for industrial architecture."
+  },
+  {
+    id: "P07",
+    n: "ReField",
+    ax: "indust",
+    s: "Shahd Haytham",
+    o: true,
+    note: "This project transforms rice straw waste from the Nile Delta into modular bio-composite building systems. Located between the mainland and a floodplain island, it combines material processing, digital fabrication, research, and public interaction. The mainland contains production and development facilities, while the island becomes a testing landscape for assembling and experiencing the modular systems. The project redefines recycling as an architectural infrastructure that connects industry, ecology, circular construction, and community awareness."
+  },
+  {
+    id: "P08",
+    n: "Bio-Material Pilot Facility",
+    ax: "indust",
+    s: null,
+    o: false,
+    note: "The Bio-Material Pilot Facility transforms biological research into practical biomedical and material products. It receives validated bio-formulations from Nile Helix and processed agricultural biomass from the waste network, then converts them into experimental materials ready for testing, evaluation, and distribution. The facility works as a bridge between laboratory research and real-world production, allowing new bio-based products to be prototyped, refined, and scaled. Its feedback loop helps research projects improve their formulas based on manufacturing and performance results."
+  },
+  {
+    id: "P09",
+    n: "Agri-Tech Fabrication Foundry",
+    ax: "indust",
+    s: null,
+    o: false,
+    note: "The Agri-Tech Fabrication Foundry is a manufacturing hub for precision agriculture and vertical farming technologies. It produces hydroponic racks, LED systems, sensors, and robotic components based on specifications from the Bio-Digital Nexus. It also supports Digital Roots by supplying agricultural IoT tools and demonstration equipment. By linking research, fabrication, and farming practice, the foundry turns digital agricultural ideas into physical systems that can be tested, distributed, and improved across the Nile 2050 network."
+  },
+  {
+    id: "P10",
+    n: "SYNTROPY",
+    ax: "logist",
+    s: "Reina Yasser",
+    o: true,
+    note: "Syntropy is an agricultural logistics project that aims to reduce fragmentation in Egypt’s crop value chain. It focuses on solving post-harvest loss and inefficient transportation by repositioning the Nile as a main corridor for moving high-value crops such as citrus and vegetables. Through a “farm-to-global” workflow, the project connects local farms to national and international markets using a seamless, technology-supported logistics system that improves speed, quality, and economic value."
+  },
+  {
+    id: "P11",
+    n: "Logistics-South-01",
+    ax: "logist",
+    s: "Omar Walid",
+    o: true,
+    note: "Logistics-South-01 is a futuristic logistics megastructure designed to revive the Nile floodplains as productive economic infrastructure. It connects river barges, railways, electric trucks, sorting systems, cold-chain storage, distribution, data control, and public markets into one integrated hub. Supported by renewable energy, digital tracking, and a logistics academy, the project reduces post-harvest losses and improves farmers’ access to markets. It reimagines the Nile as a modern commercial lifeline for Egypt’s agricultural future."
+  },
+  {
+    id: "P12",
+    n: "Red Nile",
+    ax: "logist",
+    s: "Clara George Shaker",
+    o: true,
+    note: "The RedNile Logistical Hub is a logistics and marketing facility proposed on Qena’s West Bank floodplain. The project takes advantage of Qena’s strategic position near the Red Sea corridor, the Nile, and the emerging Golden Triangle development. It provides a specialized platform for processing, marketing, distributing, and exporting regional products and materials. By activating unused floodplain land, the hub connects local production to central Egypt, Upper Egypt, and wider Nile basin markets."
+  },
+  {
+    id: "P13",
+    n: "Waste Collection & Processing",
+    ax: "logist",
+    s: null,
+    o: false,
+    note: "Waste Collection & Processing acts as the material-aggregation node of the network. It collects agricultural residues, organic runoff, biomass, and by-products from farming and production systems, then stabilizes and prepares them for reuse. These materials feed into bio-composite production, biomedical research, and waste-to-value industries. By coordinating with logistics projects such as SYNTROPY, it turns scattered waste streams into organized resources, reducing environmental pressure while supporting circular production across agricultural, industrial, and research axes."
+  },
+  {
+    id: "P14",
+    n: "Distribution Hub",
+    ax: "logist",
+    s: null,
+    o: false,
+    note: "The Distribution Hub supports the movement of finished biomedical and material products from pilot production facilities to hospitals, markets, and institutional users. It connects manufacturing outputs with real-world evaluation, making sure products are not only produced but also tested through actual use. The hub also returns performance data to research centers such as Nile Helix, creating a feedback loop between users, healthcare systems, and innovation labs. It functions as the commercial and logistical platform for applied biomedical outputs."
+  },
+  {
+    id: "P15",
+    n: "Nile Wheat Nexus",
+    ax: "research",
+    s: "Andrew Ashraf",
+    o: true,
+    note: "Nile Wheat Nexus is an urban-scale research and demonstration campus focused on strengthening Egypt’s wheat resilience. It connects scientific research, pilot testing, training, certification, policy support, and public communication into one integrated system. The project studies real problems from farms, silos, mills, and bakeries, then transforms findings into practical protocols, standards, dashboards, and training programs. Through organized zoning and separated flows, it supports a complete seed-to-bread improvement pipeline."
+  },
+  {
+    id: "P16",
+    n: "Bio-Digital Nexus",
+    ax: "research",
+    s: "Youstina Samy",
+    o: true,
+    note: "This project merges vertical farming, scientific research, and public education within one unified architectural form. High-rise towers support food production and data storage, while connected laboratories and irrigation research centers develop new agricultural methods. The project creates a direct relationship between cultivation, experimentation, technology, and learning. By combining productive farming systems with research and public engagement, it proposes an architectural model for future food security and sustainable urban agriculture."
+  },
+  {
+    id: "P17",
+    n: "Nile Helix",
+    ax: "research",
+    s: "Fatma Sayed",
+    o: true,
+    note: "Nile Helix is a regenerative biotechnology hub inspired by the triple helix structure of collagen fibers. The project uses Egypt’s fishery resources to extract collagen for medical and cosmetic applications, linking production, research, and administration through one continuous process. Raw materials are transformed into biomaterials, tested in laboratories, and developed into useful products. The project supports Egyptian biomedical innovation while exploring how architecture can express connection, growth, and scientific transformation."
+  },
+  {
+    id: "P18",
+    n: "Cotton-to-Textile Innovation",
+    ax: "research",
+    s: null,
+    o: false,
+    note: "Cotton-to-Textile Innovation transforms Egyptian cotton from a raw agricultural product into a research, design, and market-driven system. It develops textile prototypes, studies natural dye formulations, and connects technical research with artisan feedback. The project sends finished products through logistics hubs for distribution while redirecting cotton waste into bio-composite material production. It creates a circular relationship between agriculture, craft, industry, and export, positioning cotton as both a cultural material and a modern innovation platform."
+  },
+  {
+    id: "P19",
+    n: "Corn & Feed Systems Innovation",
+    ax: "research",
+    s: null,
+    o: false,
+    note: "Corn & Feed Systems Innovation focuses on improving corn production and animal feed supply chains through applied research, crop testing, and waste-to-value strategies. It connects Nile Geo-Core’s genetic resources with Digital Roots’ agricultural data systems, helping develop heat-tolerant and efficient corn varieties. The project also studies corn stalks, silage quality, and feed-processing protocols, linking agriculture to livestock productivity and waste-processing networks. It strengthens food security by treating corn as both a crop and an industrial resource."
+  },
+  {
+    id: "P20",
+    n: "Recipro(Flow)",
+    ax: "tourism",
+    s: "Shahd Alabbasy",
+    o: true,
+    note: "This project acts as a cultural tourism transition hub that connects Red Sea recreation with Upper Egypt’s heritage corridor. Located near Qena and Dendera, it introduces visitors to Sa‘idi identity through museums, craft workshops, performances, hospitality, dining, and exhibitions. Inspired by weaving, the architecture translates interlaced threads into connected spaces and circulation paths, creating a cultural gateway where tourists and locals exchange traditions, crafts, and experiences."
+  },
+  {
+    id: "P21",
+    n: "The Common Ground",
+    ax: "tourism",
+    s: "Abdelrahman Sherif",
+    o: true,
+    note: "The Common Ground is a sensory agrotourism destination that turns agriculture into a public cultural experience. Through medicinal and aromatic plant fields, local markets, workshops, hospitality spaces, and Nile-edge landscapes, the project reconnects visitors with farming, production, local identity, and the river. It creates a place where agriculture is not only seen as work, but also as education, tourism, wellness, and community interaction rooted in the landscape."
+  },
+  {
+    id: "P22",
+    n: "The Ascents",
+    ax: "tourism",
+    s: "Abdelrahman Helal",
+    o: true,
+    note: "The Ascents is a vertical cultural and tourism network that connects the Nile floodplain, river islands, cliff edges, and desert summit. It uses cable cars, panoramic elevators, cliff hospitality pods, cultural campuses, craft zones, media production spaces, amusement areas, and observation platforms to create a layered journey from water to sky. The project protects agricultural land by building within the vertical desert, turning overlooked cliffs and islands into a high-tech cultural destination."
+  },
+  {
+    id: "P23",
+    n: "Heritage Interpretation Center",
+    ax: "tourism",
+    s: null,
+    o: false,
+    note: "The Heritage Interpretation Center is the storytelling and knowledge-display hub of the Nile 2050 network. It gathers outputs, visitor data, technologies, and cultural narratives from agriculture, industry, logistics, research, and tourism projects, then translates them into public exhibitions and educational experiences. It helps visitors understand how the separate projects form one connected national system. The center also redirects visitors toward farms, craft hubs, and tourism routes, making heritage an active connector rather than a static display."
+  },
+  {
+    id: "P24",
+    n: "Artisan Village & Craft Hub",
+    ax: "tourism",
+    s: null,
+    o: false,
+    note: "The Artisan Village & Craft Hub supports local craft economies by connecting traditional making with materials, tourism, and research. It receives bio-composite materials, natural dye crops, cotton textile prototypes, and visitor flows from across the network. In return, it provides artisan feedback, craft knowledge, market insight, and cultural products to tourism and research projects. The village preserves traditional skills while integrating them into a contemporary production system, allowing craft to become both a cultural experience and an economic engine."
+  }
 ];
 
 let CONNS=[
   {
     "f": "P01",
     "t": "P02",
-    "w": "Genetic data \u0026 climate-resilient seeds",
+    "w": "Genetic data & climate-resilient seeds",
     "s": "●"
   },
   {
     "f": "P01",
-    "t": "P22",
+    "t": "P21",
     "w": "Climate-resilient plant material for medicinal crops",
     "s": "○"
   },
   {
     "f": "P02",
-    "t": "P16",
-    "w": "Farmer training methodology \u0026 local agricultural data",
+    "t": "P15",
+    "w": "Farmer training methodology & local agricultural data",
     "s": "●"
   },
   {
-    "f": "P16",
+    "f": "P15",
     "t": "P02",
     "w": "Climate-resilient wheat cultivation protocols, seed-to-bread quality standards, and national agricultural certification frameworks to deploy at the local scale.",
     "s": "●"
   },
   {
     "f": "P02",
-    "t": "P17",
-    "w": "Agri-tech protocols \u0026 crop research data",
+    "t": "P16",
+    "w": "Agri-tech protocols & crop research data",
     "s": "○"
   },
   {
-    "f": "P17",
+    "f": "P16",
     "t": "P02",
-    "w": "Vertical farming tech \u0026 crop data to local training",
+    "w": "Vertical farming tech & crop data to local training",
     "s": "○"
   },
   {
     "f": "P05",
     "t": "P12",
-    "w": "CAF panels \u0026 manufactured materials",
+    "w": "CAF panels & manufactured materials",
     "s": "●"
   },
   {
@@ -795,7 +691,7 @@ let CONNS=[
   {
     "f": "P06",
     "t": "P11",
-    "w": "Processed minerals \u0026 magnetic products for export",
+    "w": "Processed minerals & magnetic products for export",
     "s": "○"
   },
   {
@@ -807,7 +703,7 @@ let CONNS=[
   {
     "f": "P10",
     "t": "P11",
-    "w": "Cold Corridor infrastructure \u0026 chilled produce",
+    "w": "Cold Corridor infrastructure & chilled produce",
     "s": "●"
   },
   {
@@ -824,31 +720,31 @@ let CONNS=[
   },
   {
     "f": "P12",
-    "t": "P21",
+    "t": "P20",
     "w": "Logistics connectivity enabling tourist access to Qena",
     "s": "○"
   },
   {
-    "f": "P21",
-    "t": "P23",
-    "w": "Shared Upper Egypt tourism corridor, tourist redirection",
-    "s": "●"
-  },
-  {
-    "f": "P23",
-    "t": "P21",
-    "w": "Shared Upper Egypt tourism corridor, tourist redirection",
-    "s": "●"
-  },
-  {
-    "f": "P18",
+    "f": "P20",
     "t": "P22",
-    "w": "Collagen \u0026 wellness products to agrotourism retreat",
+    "w": "Shared Upper Egypt tourism corridor, tourist redirection",
+    "s": "●"
+  },
+  {
+    "f": "P22",
+    "t": "P20",
+    "w": "Shared Upper Egypt tourism corridor, tourist redirection",
+    "s": "●"
+  },
+  {
+    "f": "P17",
+    "t": "P21",
+    "w": "Collagen & wellness products to agrotourism retreat",
     "s": "○"
   },
   {
     "f": "P01",
-    "t": "P16",
+    "t": "P15",
     "w": "Seed genomics data supporting crop resilience research",
     "s": "○"
   },
@@ -896,7 +792,7 @@ let CONNS=[
   },
   {
     "f": "P04",
-    "t": "P17",
+    "t": "P16",
     "w": "Water control automation expertise for vertical farm irrigation systems",
     "s": "○"
   },
@@ -907,7 +803,7 @@ let CONNS=[
     "s": "●"
   },
   {
-    "f": "P18",
+    "f": "P17",
     "t": "P08",
     "w": "Research-validated bio-formulations and biomedical material specifications",
     "s": "●"
@@ -920,12 +816,12 @@ let CONNS=[
   },
   {
     "f": "P08",
-    "t": "P18",
+    "t": "P17",
     "w": "Biomedical material testing feedback for research protocol refinement — circular",
     "s": "○"
   },
   {
-    "f": "P17",
+    "f": "P16",
     "t": "P09",
     "w": "Design specifications for hydroponic racks, precision LED systems, and IoT sensors",
     "s": "●"
@@ -938,7 +834,7 @@ let CONNS=[
   },
   {
     "f": "P09",
-    "t": "P17",
+    "t": "P16",
     "w": "Custom-fabricated indoor agriculture hardware including harvesting robotics",
     "s": "●"
   },
@@ -955,7 +851,7 @@ let CONNS=[
     "s": "○"
   },
   {
-    "f": "P20",
+    "f": "P19",
     "t": "P13",
     "w": "Corn stalk processing protocols and silage quality standards",
     "s": "○"
@@ -968,120 +864,120 @@ let CONNS=[
   },
   {
     "f": "P13",
-    "t": "P18",
+    "t": "P17",
     "w": "Standardized agricultural waste research samples and aquaculture by-products",
     "s": "○"
   },
   {
-    "f": "P18",
+    "f": "P17",
     "t": "P14",
     "w": "Research publications and healthcare innovation documentation",
     "s": "○"
   },
   {
     "f": "P14",
-    "t": "P24",
+    "t": "P23",
     "w": "Medical supply chain success stories for heritage center educational exhibits",
     "s": "○"
   },
   {
     "f": "P14",
-    "t": "P18",
+    "t": "P17",
     "w": "Hospital medical material performance data for research optimization — circular",
     "s": "○"
   },
   {
     "f": "P01",
-    "t": "P20",
+    "t": "P19",
     "w": "Drought-tolerant corn cultivars and feed crop genetic material",
     "s": "●"
   },
   {
-    "f": "P20",
+    "f": "P19",
     "t": "P01",
     "w": "Corn genetic requirements for heat stress tolerance and irrigation efficiency",
     "s": "○"
   },
   {
-    "f": "P25",
-    "t": "P19",
+    "f": "P24",
+    "t": "P18",
     "w": "Artisan feedback on textile performance, weaving insights, and craft market demands",
     "s": "○"
   },
   {
-    "f": "P19",
+    "f": "P18",
     "t": "P12",
     "w": "Textile prototypes and cotton products for international distribution via logistics hub",
     "s": "●"
   },
   {
-    "f": "P19",
-    "t": "P25",
+    "f": "P18",
+    "t": "P24",
     "w": "Cotton textile prototypes, natural dye formulations, and weaving technique documentation",
     "s": "●"
   },
   {
-    "f": "P19",
+    "f": "P18",
     "t": "P07",
     "w": "Cotton fiber waste recycling protocols for bio-composite material integration",
     "s": "○"
   },
   {
-    "f": "P17",
-    "t": "P24",
+    "f": "P16",
+    "t": "P23",
     "w": "Vertical farming technology exhibits and precision agriculture visualization",
     "s": "○"
   },
   {
-    "f": "P22",
-    "t": "P24",
+    "f": "P21",
+    "t": "P23",
     "w": "Agri-tourism visitor insights and community marketplace success metrics",
     "s": "○"
   },
   {
-    "f": "P21",
-    "t": "P24",
+    "f": "P20",
+    "t": "P23",
     "w": "Tourism coordination data and visitor experience optimization insights",
     "s": "○"
   },
   {
-    "f": "P23",
-    "t": "P24",
+    "f": "P22",
+    "t": "P23",
     "w": "Panoramic observation insights and suspended architecture documentation",
     "s": "○"
   },
   {
-    "f": "P24",
+    "f": "P23",
     "t": "P03",
     "w": "Heritage center visitor referrals for authentic farming experiences",
     "s": "○"
   },
   {
-    "f": "P24",
-    "t": "P25",
+    "f": "P23",
+    "t": "P24",
     "w": "Visitor flows seeking hands-on craft workshops and artisan experiences",
     "s": "●"
   },
   {
     "f": "P07",
-    "t": "P25",
+    "t": "P24",
     "w": "Bio-composite building materials for artisan village construction and workshops",
     "s": "○"
   },
   {
-    "f": "P25",
-    "t": "P22",
+    "f": "P24",
+    "t": "P21",
     "w": "Artisan crafts for Common Ground marketplace and cultural experience programming",
     "s": "○"
   },
   {
-    "f": "P25",
+    "f": "P24",
     "t": "P01",
     "w": "Traditional seed preservation knowledge from artisan community — circular",
     "s": "○"
   },
   {
-    "f": "P16",
+    "f": "P15",
     "t": "P10",
     "w": "Loss-reduction protocols for transport and handling.",
     "s": "●"
@@ -1093,7 +989,7 @@ let CONNS=[
     "s": "○"
   },
   {
-    "f": "P21",
+    "f": "P20",
     "t": "P05",
     "w": "Visitors for production-cycle tour.",
     "s": "○"
@@ -1111,7 +1007,7 @@ let CONNS=[
     "s": "○"
   },
   {
-    "f": "P17",
+    "f": "P16",
     "t": "P01",
     "w": "Advanced genomic data and bio-research to guide physical seed engineering.",
     "s": "○"
@@ -1135,7 +1031,7 @@ let CONNS=[
     "s": "○"
   },
   {
-    "f": "P16",
+    "f": "P15",
     "t": "P11",
     "w": "Wheat received and exported among the hub’s Egyptian agricultural export.",
     "s": "○"
@@ -1147,109 +1043,103 @@ let CONNS=[
     "s": "○"
   },
   {
-    "f": "P17",
+    "f": "P16",
     "t": "P11",
     "w": "Harvested crop yields and farming produce distributed for export.",
     "s": "○"
   },
   {
-    "f": "P18",
+    "f": "P17",
     "t": "P11",
     "w": "Vitamins, collagen, wellness products, and medical products exported as part of manufactured goods.",
     "s": "○"
   },
   {
     "f": "P11",
-    "t": "P23",
+    "t": "P22",
     "w": "Imported African livestock.",
     "s": "○"
   },
   {
-    "f": "P22",
-    "t": "P21",
+    "f": "P21",
+    "t": "P20",
     "w": "Shared Upper Egypt tourism corridor and tourist redirection.",
     "s": "○"
   },
   {
     "f": "P10",
-    "t": "P21",
+    "t": "P20",
     "w": "Chilled, sorted, and processed agricultural products for restaurants, cafés, and tourism food services.",
     "s": "○"
   },
   {
-    "f": "P18",
-    "t": "P21",
+    "f": "P17",
+    "t": "P20",
     "w": "Egyptian body care products, collagen-based skincare, and promotion of local Egyptian products for tourists.",
     "s": "○"
   },
   {
-    "f": "P19",
-    "t": "P21",
+    "f": "P18",
+    "t": "P20",
     "w": "Artisan feedback on textile performance, weaving insights, and craft market demands.",
     "s": "○"
   },
   {
-    "f": "P21",
-    "t": "P22",
+    "f": "P20",
+    "t": "P21",
     "w": "Shared Upper Egypt tourism corridor and tourist redirection.",
     "s": "○"
   },
   {
-    "f": "P21",
+    "f": "P20",
     "t": "P13",
     "w": "Project solid waste and ruined craft materials.",
     "s": "○"
   },
   {
     "f": "P10",
-    "t": "P23",
-    "w": "Chilled and sorted produce.",
-    "s": "○"
-  },
-  {
-    "f": "P10",
     "t": "P22",
     "w": "Chilled and sorted produce.",
     "s": "○"
   },
   {
+    "f": "P10",
+    "t": "P21",
+    "w": "Chilled and sorted produce.",
+    "s": "○"
+  },
+  {
     "f": "P01",
-    "t": "P17",
+    "t": "P16",
     "w": "Extract and process seed stock.",
     "s": "○"
   },
   {
-    "f": "P18",
-    "t": "P17",
+    "f": "P17",
+    "t": "P16",
     "w": "Fish stock for the aquaponic system.",
     "s": "○"
   },
   {
-    "f": "P17",
+    "f": "P16",
     "t": "P10",
     "w": "Distribute harvested crop yields.",
     "s": "○"
   },
   {
     "f": "P01",
-    "t": "P18",
+    "t": "P17",
     "w": "Nutrient-rich seeds and reusable agricultural residues as sustainable feed supplements that improve fish health and collagen quality.",
     "s": "○"
   },
   {
-    "f": "P18",
-    "t": "P16",
+    "f": "P17",
+    "t": "P15",
     "w": "Performance data and fish health results are sent back to the wheat research zone to evaluate how agricultural waste improves fish growth and collagen quality.",
     "s": "○"
   },
   {
-    "f": "P15",
-    "t": "P02",
-    "w": "Hydrological sediment transport data and raw floodplain soil metrics to guide localized, flood-adaptive cultivation trials.",
-    "s": "○"
-  },
-  {
-    "f": "P24",
+    "f": "P23",
     "t": "P02",
     "w": "Regional visitor streams and educational tourist flows looking to engage in hands-on community workshops and field training.",
     "s": "○"
@@ -1262,13 +1152,13 @@ let CONNS=[
   },
   {
     "f": "P02",
-    "t": "P25",
+    "t": "P24",
     "w": "Palm fronds and raw botanical waste to directly supply local artisan workshops with materials for traditional basket-weaving and craft production.",
     "s": "○"
   },
   {
     "f": "P02",
-    "t": "P24",
+    "t": "P23",
     "w": "Localized agri-tech innovation milestones and community resilience metrics to enrich cross-axis regional educational exhibits.",
     "s": "○"
   },
@@ -1279,13 +1169,12 @@ let CONNS=[
     "s": "○"
   },
   {
-    "f": "P24",
-    "t": "P21",
+    "f": "P23",
+    "t": "P20",
     "w": "Shared Upper Egypt tourism corridor and tourist redirection.",
     "s": "○"
   }
 ];
-
 
 let uConns=[];
 let activeAx='ALL', selId=null, selStr='●', addPanel=null, addTargetProject='', addDesc='', addStrength='●';
@@ -1328,6 +1217,12 @@ function setAxis(ax){
     else {b.style.background=''; b.style.borderColor=''; b.style.color=ax==='ALL'?'':(AX[b.dataset.axis]?.c || '');}
   });
   renderExplorer();
+  if(document.getElementById('map-view')?.classList.contains('active')){
+    selectedMapId=null;
+    focusedMapConnectionKey=null;
+    showAllMapConnections=false;
+    renderMapWithoutMovingView();
+  }
 }
 
 function renderExplorer(){
@@ -1370,6 +1265,7 @@ function renderSelected(){
     const connIndex = CONNS.indexOf(c);
     return `<div class="conn-card" onclick="selectProject('${oid}')">
       <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(${connIndex}, event); return false;">−</button>
+      <button type="button" class="see-map" title="See this connection on the map" onclick="focusConnectionOnMap(${connIndex}, event); return false;">Map</button>
       <div class="arrow" style="color:${axC(oth.ax)};background:${axC(oth.ax)}16">${arrow}</div>
       <div style="min-width:0;flex:1">
         <div class="conn-name" style="color:${axC(oth.ax)}">${displayId(oth.id)} · ${oth.n}</div>
@@ -1592,11 +1488,316 @@ function removeConnection(f,t,w,str){
   return false;
 }
 
+
+let nileMap=null, mapLayerGroup=null, selectedMapId=null, showAllMapConnections=false, focusedMapConnectionKey=null;
+let hiddenMapConnections=new Set();
+let suppressMapAutoFit=false;
+
+function parseCoords(value){
+  if(!value) return null;
+  const str=String(value).trim();
+  const decimal=str.match(/-?\d+(?:\.\d+)?/g);
+  if(str.includes('°')){
+    const parts=[];
+    const re=/(\d+(?:\.\d+)?)°\s*(\d+(?:\.\d+)?)'\s*(\d+(?:\.\d+)?)"?\s*([NSEW])/gi;
+    let m;
+    while((m=re.exec(str))){
+      let v=Number(m[1])+Number(m[2])/60+Number(m[3])/3600;
+      if(/[SW]/i.test(m[4])) v=-v;
+      parts.push(v);
+    }
+    if(parts.length>=2) return [parts[0],parts[1]];
+  }
+  if(decimal && decimal.length>=2) return [Number(decimal[0]),Number(decimal[1])];
+  return null;
+}
+
+function mapCoords(id){
+  const loc=PROJECT_LOCATIONS[id];
+  return loc ? parseCoords(loc.coords) : null;
+}
+
+function curvedLinePoints(a,b,curve){
+  const lat1=a[0], lng1=a[1], lat2=b[0], lng2=b[1];
+  const dx=lng2-lng1, dy=lat2-lat1;
+  const dist=Math.sqrt(dx*dx+dy*dy)||1;
+  const nx=-dy/dist, ny=dx/dist;
+  const bend=(curve||0.18)*dist;
+  const pts=[];
+  for(let i=0;i<=28;i++){
+    const t=i/28;
+    const q=4*t*(1-t);
+    const lat=lat1+(lat2-lat1)*t+ny*bend*q;
+    const lng=lng1+(lng2-lng1)*t+nx*bend*q;
+    pts.push([lat,lng]);
+  }
+  return pts;
+}
+
+function connectedIdsFor(id){
+  const ids=new Set();
+  allConns().forEach(c=>{
+    if(c.f===id) ids.add(c.t);
+    if(c.t===id) ids.add(c.f);
+  });
+  return ids;
+}
+
+function mapConnectionRows(id){
+  return allConns().map((c,idx)=>({...c,idx})).filter(c=>c.f===id || c.t===id);
+}
+function activeMapAxis(){
+  return activeAx && activeAx!=='ALL' ? activeAx : null;
+}
+
+function mapAxisRows(axis){
+  const axisIds=new Set(P.filter(p=>p.ax===axis).map(p=>p.id));
+  return allConns().map((c,idx)=>({...c,idx})).filter(c=>axisIds.has(c.f) || axisIds.has(c.t));
+}
+
+function mapAxisRelatedIds(axis){
+  const core=new Set(P.filter(p=>p.ax===axis).map(p=>p.id));
+  const related=new Set(core);
+  allConns().forEach(c=>{
+    if(core.has(c.f) || core.has(c.t)){ related.add(c.f); related.add(c.t); }
+  });
+  return {core, related};
+}
+
+
+function initMap(){
+  const el=document.getElementById('nile-map');
+  if(!el) return;
+  if(typeof L==='undefined'){
+    el.innerHTML='<div style="padding:24px;color:#667085;font-weight:800">Map library could not load. Check your internet connection.</div>';
+    return;
+  }
+  if(!nileMap){
+    el.innerHTML='';
+    nileMap=L.map('nile-map',{scrollWheelZoom:true,zoomControl:true}).setView([27.5,30.8],6);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(nileMap);
+    mapLayerGroup=L.layerGroup().addTo(nileMap);
+  }
+  enableMapSideScrollHandoff();
+  setTimeout(()=>nileMap.invalidateSize(),80);
+  renderMap();
+}
+
+function enableMapSideScrollHandoff(){
+  const side=document.getElementById('map-info');
+  if(!side || side.dataset.scrollHandoff==='1') return;
+  side.dataset.scrollHandoff='1';
+  side.addEventListener('wheel',function(e){
+    const canScroll=this.scrollHeight>this.clientHeight+2;
+    if(!canScroll){
+      window.scrollBy({top:e.deltaY,left:0,behavior:'auto'});
+      e.preventDefault();
+    }
+  },{passive:false});
+}
+
+function selectMapProject(id){
+  focusedMapConnectionKey=null;
+  selectedMapId = selectedMapId===id ? null : id;
+  renderMap();
+}
+
+function clearMapSelection(){
+  selectedMapId=null;
+  focusedMapConnectionKey=null;
+  showAllMapConnections=false;
+  setAxis('ALL');
+  renderMapWithoutMovingView();
+}
+
+function renderMapWithoutMovingView(){
+  if(!nileMap){ renderMap(); return; }
+  const center=nileMap.getCenter();
+  const zoom=nileMap.getZoom();
+  suppressMapAutoFit=true;
+  renderMap();
+  nileMap.setView(center,zoom,{animate:false});
+  suppressMapAutoFit=false;
+}
+
+function toggleAllMapConnections(){
+  showAllMapConnections=!showAllMapConnections;
+  focusedMapConnectionKey=null;
+  renderMapWithoutMovingView();
+}
+
+function connectionKey(c){
+  return `${c.f}|${c.t}|${c.s}|${c.w}`;
+}
+
+function toggleMapConnection(key,event){
+  if(event){event.preventDefault();event.stopPropagation();}
+  if(hiddenMapConnections.has(key)) hiddenMapConnections.delete(key);
+  else hiddenMapConnections.add(key);
+  renderMapWithoutMovingView();
+}
+
+function focusConnectionOnMap(index,event){
+  if(event){event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();}
+  const c=CONNS[index];
+  if(!c) return false;
+  focusedMapConnectionKey=connectionKey(c);
+  selectedMapId=null;
+  showAllMapConnections=false;
+  switchTab('map');
+  setTimeout(()=>renderMap(),80);
+  return false;
+}
+
+function drawConnectionLine(c,idx,mode){
+  const a=mapCoords(c.f), b=mapCoords(c.t);
+  if(!a || !b) return [];
+  const key=connectionKey(c);
+  if(hiddenMapConnections.has(key)) return [];
+  const dirSeed=(idx%2===0?1:-1);
+  const strengthBend=mode==='all' ? (c.s==='●'?0.24:0.18) : (c.s==='●'?0.28:0.22);
+  const pts=curvedLinePoints(a,b,strengthBend*dirSeed);
+  let color='#64748b', opacity=.38, weight=2.4, haloOpacity=.32;
+  if(mode==='selected'){
+    color=c.f===selectedMapId?'#1f7a4f':'#2b6cb0';
+    opacity=c.s==='●'?.86:.62;
+    weight=c.s==='●'?4.4:3.4;
+    haloOpacity=.52;
+  } else if(mode==='focus'){
+    color='#101820'; opacity=.9; weight=4.8; haloOpacity=.58;
+  } else if(mode==='axis'){
+    const activeAxis=activeMapAxis();
+    const fromAxis=byId(c.f)?.ax;
+    const toAxis=byId(c.t)?.ax;
+    color=axC(fromAxis===activeAxis ? fromAxis : toAxis===activeAxis ? toAxis : fromAxis);
+    opacity=c.s==='●'?.64:.42; weight=c.s==='●'?3.5:2.7; haloOpacity=.42;
+  } else if(mode==='all'){
+    color=axC(byId(c.f)?.ax); opacity=c.s==='●'?.34:.18; weight=c.s==='●'?2.4:1.8; haloOpacity=.22;
+  }
+  const halo=L.polyline(pts,{color:'#ffffff',weight:weight+5,opacity:haloOpacity,lineCap:'round',lineJoin:'round',interactive:false});
+  halo.addTo(mapLayerGroup);
+  const line=L.polyline(pts,{color,weight,opacity,dashArray:c.s==='●'?null:'4 8',lineCap:'round',lineJoin:'round',smoothFactor:.7})
+    .bindTooltip(`${displayId(c.f)} → ${displayId(c.t)}: ${c.w}`,{sticky:true});
+  line.addTo(mapLayerGroup);
+  return [a,b];
+}
+
+function renderMap(){
+  if(!nileMap || !mapLayerGroup) return;
+  mapLayerGroup.clearLayers();
+  const allRows=allConns().map((c,idx)=>({...c,idx}));
+  const focusedRow=focusedMapConnectionKey ? allRows.find(c=>connectionKey(c)===focusedMapConnectionKey) : null;
+  const connected=selectedMapId ? connectedIdsFor(selectedMapId) : new Set();
+  const focusedIds=focusedRow ? new Set([focusedRow.f,focusedRow.t]) : new Set();
+  const axisMode=(!focusedRow && !showAllMapConnections && !selectedMapId) ? activeMapAxis() : null;
+  const axisSets=axisMode ? mapAxisRelatedIds(axisMode) : {core:new Set(), related:new Set()};
+  const bounds=[];
+
+  const toggle=document.getElementById('all-connections-toggle');
+  if(toggle){
+    toggle.classList.toggle('active',showAllMapConnections);
+    toggle.textContent=showAllMapConnections?'Hide all connections':'Show all connections';
+  }
+
+  if(focusedRow){
+    bounds.push(...drawConnectionLine(focusedRow,focusedRow.idx,'focus'));
+  } else if(showAllMapConnections){
+    allRows.forEach(c=>bounds.push(...drawConnectionLine(c,c.idx,'all')));
+  } else if(selectedMapId){
+    mapConnectionRows(selectedMapId).forEach(c=>bounds.push(...drawConnectionLine(c,c.idx,'selected')));
+  } else if(axisMode){
+    mapAxisRows(axisMode).forEach(c=>bounds.push(...drawConnectionLine(c,c.idx,'axis')));
+  }
+
+  P.forEach(p=>{
+    const coords=mapCoords(p.id);
+    if(!coords) return;
+    const isSelected=p.id===selectedMapId;
+    const isConnected=selectedMapId && connected.has(p.id);
+    const isFocused=focusedIds.has(p.id);
+    const isAxisCore=axisMode && axisSets.core.has(p.id);
+    const isAxisRelated=axisMode && axisSets.related.has(p.id) && !isAxisCore;
+    const shouldFade=(focusedRow && !isFocused) || (selectedMapId && !showAllMapConnections && !isSelected && !isConnected) || (axisMode && !isAxisCore && !isAxisRelated);
+    const cls=isFocused?'focused':isSelected?'selected':isConnected?'connected':isAxisCore?'axis-core':isAxisRelated?'axis-related':shouldFade?'faded':'';
+    const icon=L.divIcon({className:'',html:`<div class="map-marker ${cls}" style="--axis:${axC(p.ax)}" aria-label="${displayId(p.id)} · ${p.n}"></div>`,iconSize:[16,16],iconAnchor:[8,8]});
+    const marker=L.marker(coords,{icon}).addTo(mapLayerGroup);
+    marker.bindTooltip(`${displayId(p.id)} · ${p.n}`,{className:'project-tooltip',direction:'top',offset:[0,-10],opacity:.98});
+    marker.on('click',()=>selectMapProject(p.id));
+    bounds.push(coords);
+  });
+  if(bounds.length && (selectedMapId || focusedRow) && !suppressMapAutoFit){
+    nileMap.fitBounds(bounds,{padding:[70,70],maxZoom:8});
+  }
+  renderMapInfo();
+}
+
+function renderMapInfo(){
+  const side=document.getElementById('map-info');
+  if(!side) return;
+  const allRows=allConns().map((c,idx)=>({...c,idx}));
+  const focusedRow=focusedMapConnectionKey ? allRows.find(c=>connectionKey(c)===focusedMapConnectionKey) : null;
+  const legendHTML=`<div class="map-legend">${Object.values(AX).map(a=>`<div class="map-legend-pill"><span class="map-legend-dot" style="--axis:${a.c}"></span>${a.l}</div>`).join('')}</div>`;
+
+  if(focusedRow){
+    const from=byId(focusedRow.f), to=byId(focusedRow.t), key=connectionKey(focusedRow), hidden=hiddenMapConnections.has(key);
+    side.innerHTML=`
+      <div class="map-side-head"><div><div class="map-side-kicker">Focused connection</div><div class="map-side-title">${displayId(from.id)} → ${displayId(to.id)}</div></div><button class="map-reset" onclick="clearMapSelection()">×</button></div>
+      <div class="map-info-card"><h3>Connection</h3><div class="map-conn-row ${hidden?'hidden-line':''}"><div class="map-conn-top"><span style="color:${axC(from.ax)}">${from.n}</span><button class="conn-toggle ${hidden?'':'on'}" onclick="toggleMapConnection('${key}',event)" title="Show / hide this line"></button></div><div class="map-conn-desc"><b style="color:${axC(to.ax)}">To ${to.n}</b> — ${focusedRow.w}</div></div></div>
+      <div class="map-info-card"><h3>Map mode</h3><p>Only this connection is isolated. Use the toggle to hide/show the line, or reset the map to return to the full network.</p></div>
+      ${legendHTML}`;
+    return;
+  }
+
+  const axisMode=activeMapAxis();
+  if(axisMode && !showAllMapConnections){
+    const axis=AX[axisMode];
+    const coreProjects=P.filter(p=>p.ax===axisMode);
+    const rows=mapAxisRows(axisMode);
+    const projectList=coreProjects.map(p=>`<div class="legend-row"><div class="legend-id" style="color:${axC(p.ax)}">${displayId(p.id)}</div><div class="legend-name">${p.n}</div></div>`).join('');
+    const rowsHTML=rows.length?rows.map(c=>{
+      const from=byId(c.f), to=byId(c.t), key=connectionKey(c), hidden=hiddenMapConnections.has(key);
+      return `<div class="map-conn-row ${hidden?'hidden-line':''}"><div class="map-conn-top"><span><b style="color:${axC(from.ax)}">${displayId(from.id)}</b> → <b style="color:${axC(to.ax)}">${displayId(to.id)}</b></span><button class="conn-toggle ${hidden?'':'on'}" onclick="toggleMapConnection('${key}',event)" title="Show / hide this line"></button></div><div class="map-conn-desc">${c.w}</div></div>`;
+    }).join(''):'<div class="map-empty">No direct axis connections recorded.</div>';
+    side.innerHTML=`
+      <div class="map-side-head"><div><div class="map-side-kicker">Axis focus</div><div class="map-side-title" style="color:${axis.c}">${axis.l}</div><div class="tags" style="margin-top:10px"><span class="tag">${coreProjects.length} projects</span><span class="tag">${rows.length} connections</span></div></div><button class="map-reset" onclick="clearMapSelection()">×</button></div>
+      <div class="map-info-card"><h3>Projects in this axis</h3><div class="legend-list">${projectList}</div></div>
+      <div class="map-info-card"><h3>Axis connections</h3><div class="map-connections">${rowsHTML}</div></div>
+      ${legendHTML}`;
+    return;
+  }
+
+  if(!selectedMapId){
+    side.innerHTML=`
+      <div class="map-side-head"><div><div class="map-side-kicker">Map mode</div><div class="map-side-title">All projects</div></div></div>
+      <div class="map-info-card"><h3>How to use</h3><p>Click any project marker to isolate its direct network. Connected projects remain visible, unrelated markers fade, and curved connection lines appear on the map.</p></div>
+      <div class="map-info-card"><h3>All connections toggle</h3><p>Use <b>Show all connections</b> to display the full network. Strong links are more visible; moderate links are dashed and lighter.</p></div>
+      ${legendHTML}`;
+    return;
+  }
+
+  const p=byId(selectedMapId), loc=PROJECT_LOCATIONS[selectedMapId], rows=mapConnectionRows(selectedMapId);
+  const locationHTML=loc?`<div class="map-location-line"><b>${loc.place}</b><span>${loc.context}</span><span>${loc.coords}</span><a class="mini-action" style="display:inline-block;text-decoration:none;text-align:center;margin-top:8px" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.coords)}" target="_blank" rel="noopener">Open Map</a></div>`:'<p>Location not specified.</p>';
+  const rowsHTML=rows.length?rows.map(c=>{
+    const other=byId(c.f===selectedMapId?c.t:c.f);
+    const isOut=c.f===selectedMapId;
+    const key=connectionKey(c);
+    const hidden=hiddenMapConnections.has(key);
+    return `<div class="map-conn-row ${hidden?'hidden-line':''}"><div class="map-conn-top"><span style="color:${axC(other.ax)}">${isOut?'→':'←'} ${displayId(other.id)} · ${other.n}</span><button class="conn-toggle ${hidden?'':'on'}" onclick="toggleMapConnection('${key}',event)" title="Show / hide this line"></button></div><div class="map-conn-desc" onclick="selectMapProject('${other.id}')">${isOut?'Delivers to':'Receives from'} — ${c.w}</div></div>`;
+  }).join(''):'<div class="map-empty">No direct connections recorded.</div>';
+  side.innerHTML=`
+    <div class="map-side-head"><div><div class="map-side-kicker">${displayId(p.id)}</div><div class="map-side-title">${p.n}</div><div class="tags" style="margin-top:10px"><span class="tag" style="background:${axC(p.ax)}18;color:${axC(p.ax)};border-color:${axC(p.ax)}40">${axL(p.ax)}</span>${p.s?`<span class="tag">${p.s}</span>`:''}<span class="tag">${rows.length} connections</span></div></div><button class="map-reset" onclick="clearMapSelection()">×</button></div>
+    <div class="map-info-card"><h3>Location</h3>${locationHTML}</div>
+    <div class="map-info-card"><h3>Direct connections</h3><div class="map-connections">${rowsHTML}</div></div>
+    ${legendHTML}`;
+}
+
 function switchTab(tab){
-  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active', b.textContent.toLowerCase().includes(tab==='add'?'add':tab)));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active', b.getAttribute('onclick')===`switchTab('${tab}')`));
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById(tab+'-view').classList.add('active');
+  const view=document.getElementById(tab+'-view');
+  if(view) view.classList.add('active');
   if(tab==='matrix') renderMatrix();
+  if(tab==='map') setTimeout(initMap,50);
 }
 
 
@@ -1623,6 +1824,4 @@ function saveHTML(){
 
 initStats(); initFilters(); populateSelects(); renderExplorer();
 </script>
-
-
 </body></html>
