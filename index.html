@@ -582,20 +582,131 @@ const PROJECT_SHOTS={
   P23: "project_shots/P23.jpg",
 };
 const PROJECT_LOCATIONS={
-  P01:{place:"Biba, Beni Suef Governorate",context:"Nile Geo-Core site for seed preservation, genomic research, and floodplain cultivation systems.",coords:"28.903953, 30.993299"},
-  P02:{place:"Gazirat Sharunah, Maghagha, Minya Governorate",context:"Digital Roots campus serving the agricultural communities of Maghagha and the surrounding Nile floodplain.",coords:"28.637353, 30.846514"},
-  P05:{place:"Dandarah / Qena Governorate",context:"Fiber/Ground site within the sugarcane production landscape of Qena.",coords:"26.169367, 32.626375"},
-  P06:{place:"Rosetta / Rashid, Beheira Governorate",context:"Magnetic Commons industrial destination connected to black sand processing and magnetic material production.",coords:"30.41811570, 31.4377075"},
-  P07:{place:"Daqahlia Governorate, Nile Delta",context:"ReField site within the rice-straw landscape of the Delta, supporting bio-composite material development.",coords:"31°10'56.07\"N, 31°32'37.33\"E"},
-  P10:{place:"Al Briegat, Kom Hamada, Beheira Governorate",context:"SYNTROPY cold-corridor logistics site connected to Beheira’s agricultural production belt.",coords:"30.495202, 30.830825"},
-  P11:{place:"Abu Simbel, Aswan Governorate",context:"Logistics-South-01 southern gateway linking Nile logistics with African import and export flows.",coords:"22.361244, 31.637591"},
-  P12:{place:"El Taramsah, Qena Governorate",context:"Red Nile logistics hub positioned near Qena’s Nile and Red Sea corridor connection.",coords:"26.14193985, 32.71426376"},
-  P16:{place:"Shabour, Al-Beheira Governorate",context:"Nile Wheat Nexus research campus within a wheat and agricultural production context.",coords:"30.821003, 30.809704"},
-  P17:{place:"Giza Governorate",context:"Bio-Digital Nexus site connected to Nile island, floodplain, and urban food-production systems.",coords:"29.803458, 31.292956"},
-  P18:{place:"Beheira Governorate, Nile Delta",context:"Nile Helix biotechnology hub located within the northern Delta fishery and agricultural landscape.",coords:"30.727665, 30.768811"},
-  P21:{place:"Qena Governorate",context:"Recipro(Flow) cultural tourism gateway connecting Red Sea recreation with the Upper Egypt heritage corridor.",coords:"26°08'44.68\"N, 32°36'55.98\"E"},
-  P22:{place:"Wasta, Beni Suef Governorate",context:"The Common Ground agrotourism destination connected to medicinal plants, local markets, and Nile-edge landscapes.",coords:"29.3520136, 31.2211248"},
-  P23:{place:"Sohag Governorate",context:"The Ascents vertical tourism network linking floodplain, river islands, cliff edges, and desert high points.",coords:"26.367938, 31.885430"}
+  "P01": {
+    "place": "Biba, Beni Suef Governorate",
+    "context": "Nile Geo-Core site for seed preservation, genomic research, and floodplain cultivation systems.",
+    "coords": "28.903953, 30.993299"
+  },
+  "P02": {
+    "place": "Gazirat Sharunah, Maghagha, Minya Governorate",
+    "context": "Digital Roots campus serving the agricultural communities of Maghagha and the surrounding Nile floodplain.",
+    "coords": "28.637353, 30.846514"
+  },
+  "P03": {
+    "place": "Beni Mazar, Minya Governorate",
+    "context": "Satellite extension of Digital Roots serving dense smallholder farming communities on the Minya west bank and linking field trials back to the wider agricultural network.",
+    "coords": "28.55, 30.82"
+  },
+  "P04": {
+    "place": "Gazirat Sharunah, Maghagha, Minya Governorate",
+    "context": "Co-located with Digital Roots as the physical execution arm for Ibrahimiya Canal water delivery and SCADA feedback.",
+    "coords": "28.637, 30.848"
+  },
+  "P05": {
+    "place": "Dandarah / Qena Governorate",
+    "context": "Fiber/Ground site within the sugarcane production landscape of Qena.",
+    "coords": "26.169367, 32.626375"
+  },
+  "P06": {
+    "place": "Rosetta / Rashid, Beheira Governorate",
+    "context": "Magnetic Commons industrial destination connected to black sand processing and magnetic material production.",
+    "coords": "31.437238, 30.416267"
+  },
+  "P07": {
+    "place": "Daqahlia Governorate, Nile Delta",
+    "context": "ReField site within the rice-straw landscape of the Delta, supporting bio-composite material development.",
+    "coords": "31°10'56.07\"N, 31°32'37.33\"E"
+  },
+  "P08": {
+    "place": "Damanhour, Beheira Governorate",
+    "context": "Bio-Material Pilot Facility located in Beheira’s administrative and industrial capital, positioned for clinical evaluation links with regional university and hospital networks.",
+    "coords": "30.47, 30.47"
+  },
+  "P09": {
+    "place": "Giza Governorate",
+    "context": "Co-located with the Bio-Digital Nexus to fabricate hydroponic racks, precision LED systems, IoT sensors, and agricultural hardware designed by the research campus.",
+    "coords": "29.803, 31.291"
+  },
+  "P10": {
+    "place": "Al Briegat, Kom Hamada, Beheira Governorate",
+    "context": "SYNTROPY cold-corridor logistics site connected to Beheira’s agricultural production belt.",
+    "coords": "30.495202, 30.830825"
+  },
+  "P11": {
+    "place": "Abu Simbel, Aswan Governorate",
+    "context": "Logistics-South-01 southern gateway linking Nile logistics with African import and export flows.",
+    "coords": "22.361244, 31.637591"
+  },
+  "P12": {
+    "place": "El Taramsah, Qena Governorate",
+    "context": "Red Nile logistics hub positioned near Qena’s Nile and Red Sea corridor connection.",
+    "coords": "26.14193985, 32.71426376"
+  },
+  "P13": {
+    "place": "Kafr El-Zayat, Gharbia Governorate",
+    "context": "Waste Collection Centre positioned on the Rosetta branch near industrial infrastructure, serving as a midpoint between major agricultural, research, and material-waste sources.",
+    "coords": "30.82, 30.81"
+  },
+  "P14": {
+    "place": "Beni Suef Governorate",
+    "context": "Distribution Hub positioned on the Nile to support biomedical and material product movement between southern production sources and Cairo-region hospitals and markets.",
+    "coords": "29.072, 31.1"
+  },
+  "P15": {
+    "place": "Abu Simbel, Aswan Governorate",
+    "context": "Co-located with Logistics-South-01 to use southern Nile barge infrastructure and sediment-rich conditions near the Aswan High Dam system.",
+    "coords": "22.362, 31.638"
+  },
+  "P16": {
+    "place": "Shabour, Al-Beheira Governorate",
+    "context": "Nile Wheat Nexus research campus within a wheat and agricultural production context.",
+    "coords": "30.821003, 30.809704"
+  },
+  "P17": {
+    "place": "Giza Governorate",
+    "context": "Bio-Digital Nexus site connected to Nile island, floodplain, and urban food-production systems.",
+    "coords": "29.803458, 31.292956"
+  },
+  "P18": {
+    "place": "Beheira Governorate, Nile Delta",
+    "context": "Nile Helix biotechnology hub located within the northern Delta fishery and agricultural landscape.",
+    "coords": "30.727665, 30.768811"
+  },
+  "P19": {
+    "place": "Kafr El Sheikh Governorate",
+    "context": "Cotton-to-Textile Centre located in Egypt’s major cotton-production landscape, connected to cotton-processing, rice-strawboard, and bio-composite material networks.",
+    "coords": "31.107, 30.94"
+  },
+  "P20": {
+    "place": "Biba, Beni Suef Governorate",
+    "context": "Co-located with Nile Geo-Core to support on-site genetic feedback loops, corn research, feed-system innovation, and stalk-waste protocols.",
+    "coords": "28.904, 30.994"
+  },
+  "P21": {
+    "place": "Qena Governorate",
+    "context": "Recipro(Flow) cultural tourism gateway connecting Red Sea recreation with the Upper Egypt heritage corridor.",
+    "coords": "26°08'44.68\"N, 32°36'55.98\"E"
+  },
+  "P22": {
+    "place": "Wasta, Beni Suef Governorate",
+    "context": "The Common Ground agrotourism destination connected to medicinal plants, local markets, and Nile-edge landscapes.",
+    "coords": "29.3520136, 31.2211248"
+  },
+  "P23": {
+    "place": "Sohag Governorate",
+    "context": "The Ascents vertical tourism network linking floodplain, river islands, cliff edges, and desert high points.",
+    "coords": "26.367938, 31.885430"
+  },
+  "P24": {
+    "place": "Dendera, Qena Governorate",
+    "context": "Heritage Interpretation Centre positioned near Dendera Temple and the Qena west bank to connect Red Nile, Recipro(Flow), and cross-Nile cultural visitor flows.",
+    "coords": "26.143, 32.671"
+  },
+  "P25": {
+    "place": "Sohag west bank, Sohag Governorate",
+    "context": "Artisan Village located beside The Ascents in a Sa’eedi craft region, linking hand-weaving heritage with bio-composite materials, seed varieties, and tourism flows.",
+    "coords": "26.368, 31.886"
+  }
 };
 
 const P=[
