@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NILE 2050 — Connection Explorer</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -185,18 +184,350 @@
         <button class="save-btn" onclick="saveHTML()">Save</button>
       </div>
     </div>
-    <div class="stats-row" id="stats-row"></div>
+    <div class="stats-row" id="stats-row"><div class="stat-pill"><span style="color:#4CAF82">●</span><b>4</b><span>Agricultural &amp; Root Ground</span></div><div class="stat-pill"><span style="color:#E07B45">●</span><b>5</b><span>Industrial &amp; Craft Engine</span></div><div class="stat-pill"><span style="color:#5BA4D4">●</span><b>6</b><span>Logistics &amp; River Spine</span></div><div class="stat-pill"><span style="color:#B07FD4">●</span><b>5</b><span>Research &amp; Mind Lab</span></div><div class="stat-pill"><span style="color:#D4A24C">●</span><b>5</b><span>Tourism &amp; Story Paths</span></div><div class="stat-pill"><b>25</b><span>projects</span></div><div class="stat-pill"><b id="tc">91</b><span>connections</span></div></div>
   </header>
 
   <div class="toolbar">
-    <div class="search"><span>⌕</span><input id="search" placeholder="Search projects…" oninput="renderExplorer()" /></div>
-    <div class="axis-filters" id="axis-filters"></div>
+    <div class="search"><span>⌕</span><input id="search" placeholder="Search projects…" oninput="renderExplorer()"></div>
+    <div class="axis-filters" id="axis-filters"><button class="axis-btn active" data-axis="ALL" onclick="setAxis('ALL')">All</button><button class="axis-btn" data-axis="agri" onclick="setAxis('agri')" style="--axis:#4CAF82;color:#4CAF82">Agricultural &amp; Root Ground</button><button class="axis-btn" data-axis="indust" onclick="setAxis('indust')" style="--axis:#E07B45;color:#E07B45">Industrial &amp; Craft Engine</button><button class="axis-btn" data-axis="logist" onclick="setAxis('logist')" style="--axis:#5BA4D4;color:#5BA4D4">Logistics &amp; River Spine</button><button class="axis-btn" data-axis="research" onclick="setAxis('research')" style="--axis:#B07FD4;color:#B07FD4">Research &amp; Mind Lab</button><button class="axis-btn" data-axis="tourism" onclick="setAxis('tourism')" style="--axis:#D4A24C;color:#D4A24C">Tourism &amp; Story Paths</button></div>
   </div>
 
   <section id="explorer-view" class="view active">
-    <div id="selected-panel" class="selected-panel"></div>
-    <div id="empty-state" class="empty"><strong>Select a project</strong>Click any card below to explore its inputs, outputs, and connection note.</div>
-    <div id="project-grid" class="project-grid"></div>
+    <div id="selected-panel" class="selected-panel active">
+    <div class="selected-head">
+      <div>
+        <div class="selected-kicker">P21</div>
+        <div class="selected-title">Recipro(Flow)</div>
+        <div class="tags">
+          <span class="tag" style="background:#D4A24C18;color:#D4A24C;border-color:#D4A24C40">Tourism &amp; Story Paths</span>
+          <span class="tag">Shahd Alabbasy</span>
+          <span class="tag">12 connections</span>
+        </div>
+      </div>
+      <button class="collapse-btn" onclick="event.stopPropagation();collapseProject()">Collapse project</button>
+    </div>
+    <div class="project-overview">
+      <section class="description-card">
+        <h3>Project Description</h3>
+        <p>This project acts as a cultural tourism transition hub that connects Red Sea recreation with Upper Egypt’s heritage corridor. Located near Qena and Dendera, it introduces visitors to Sa‘idi identity through museums, craft workshops, performances, hospitality, dining, and exhibitions. Inspired by weaving, the architecture translates interlaced threads into connected spaces and circulation paths, creating a cultural gateway where tourists and locals exchange traditions, crafts, and experiences.</p>
+      </section>
+      <section class="shot-card" style="--shot-color:#D4A24C">
+        <h3>Project Shot</h3>
+        <div class="shot-frame">
+          <img src="project_shots/P21.jpg" alt="Recipro(Flow) project shot">
+        </div>
+      </section>
+    </div>
+    <div class="detail-grid">
+      <section class="detail-section">
+        <div class="section-title"><span>Inputs · Receives from</span><div class="section-tools"><span class="count-badge">7</span><button class="add-conn" title="Add input connection" onclick="event.stopPropagation();openInlineAdd('in')">+</button></div></div>
+        
+        <div class="conn-list"><div class="conn-card" onclick="selectProject('P12')">
+      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(14, event); return false;">−</button>
+      <div class="arrow" style="color:#5BA4D4;background:#5BA4D416">←</div>
+      <div style="min-width:0;flex:1">
+        <div class="conn-name" style="color:#5BA4D4">P12 · Red Nile</div>
+        <div class="conn-desc"><b>Receives from</b> — Logistics connectivity enabling tourist access to Qena</div>
+      </div>
+      <div class="strength">○</div>
+    </div><div class="conn-card" onclick="selectProject('P23')">
+      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(16, event); return false;">−</button>
+      <div class="arrow" style="color:#D4A24C;background:#D4A24C16">←</div>
+      <div style="min-width:0;flex:1">
+        <div class="conn-name" style="color:#D4A24C">P23 · The Ascents</div>
+        <div class="conn-desc"><b>Receives from</b> — Shared Upper Egypt tourism corridor, tourist redirection</div>
+      </div>
+      <div class="strength">●</div>
+    </div><div class="conn-card" onclick="selectProject('P22')">
+      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(71, event); return false;">−</button>
+      <div class="arrow" style="color:#D4A24C;background:#D4A24C16">←</div>
+      <div style="min-width:0;flex:1">
+        <div class="conn-name" style="color:#D4A24C">P22 · The Common Ground</div>
+        <div class="conn-desc"><b>Receives from</b> — Shared Upper Egypt tourism corridor and tourist redirection.</div>
+      </div>
+      <div class="strength">○</div>
+    </div><div class="conn-card" onclick="selectProject('P10')">
+      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(72, event); return false;">−</button>
+      <div class="arrow" style="color:#5BA4D4;background:#5BA4D416">←</div>
+      <div style="min-width:0;flex:1">
+        <div class="conn-name" style="color:#5BA4D4">P10 · SYNTROPY</div>
+        <div class="conn-desc"><b>Receives from</b> — Chilled, sorted, and processed agricultural products for restaurants, cafés, and tourism food services.</div>
+      </div>
+      <div class="strength">○</div>
+    </div><div class="conn-card" onclick="selectProject('P18')">
+      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(73, event); return false;">−</button>
+      <div class="arrow" style="color:#B07FD4;background:#B07FD416">←</div>
+      <div style="min-width:0;flex:1">
+        <div class="conn-name" style="color:#B07FD4">P18 · Nile Helix</div>
+        <div class="conn-desc"><b>Receives from</b> — Egyptian body care products, collagen-based skincare, and promotion of local Egyptian products for tourists.</div>
+      </div>
+      <div class="strength">○</div>
+    </div><div class="conn-card" onclick="selectProject('P19')">
+      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(74, event); return false;">−</button>
+      <div class="arrow" style="color:#B07FD4;background:#B07FD416">←</div>
+      <div style="min-width:0;flex:1">
+        <div class="conn-name" style="color:#B07FD4">P19 · Cotton-to-Textile Innovation</div>
+        <div class="conn-desc"><b>Receives from</b> — Artisan feedback on textile performance, weaving insights, and craft market demands.</div>
+      </div>
+      <div class="strength">○</div>
+    </div><div class="conn-card" onclick="selectProject('P24')">
+      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(90, event); return false;">−</button>
+      <div class="arrow" style="color:#D4A24C;background:#D4A24C16">←</div>
+      <div style="min-width:0;flex:1">
+        <div class="conn-name" style="color:#D4A24C">P24 · Heritage Interpretation Center</div>
+        <div class="conn-desc"><b>Receives from</b> — Shared Upper Egypt tourism corridor and tourist redirection.</div>
+      </div>
+      <div class="strength">○</div>
+    </div></div>
+      </section>
+      <section class="detail-section">
+        <div class="section-title"><span>Outputs · Delivers to</span><div class="section-tools"><span class="count-badge">5</span><button class="add-conn" title="Add output connection" onclick="event.stopPropagation();openInlineAdd('out')">+</button></div></div>
+        
+        <div class="conn-list"><div class="conn-card" onclick="selectProject('P23')">
+      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(15, event); return false;">−</button>
+      <div class="arrow" style="color:#D4A24C;background:#D4A24C16">→</div>
+      <div style="min-width:0;flex:1">
+        <div class="conn-name" style="color:#D4A24C">P23 · The Ascents</div>
+        <div class="conn-desc"><b>Delivers to</b> — Shared Upper Egypt tourism corridor, tourist redirection</div>
+      </div>
+      <div class="strength">●</div>
+    </div><div class="conn-card" onclick="selectProject('P24')">
+      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(50, event); return false;">−</button>
+      <div class="arrow" style="color:#D4A24C;background:#D4A24C16">→</div>
+      <div style="min-width:0;flex:1">
+        <div class="conn-name" style="color:#D4A24C">P24 · Heritage Interpretation Center</div>
+        <div class="conn-desc"><b>Delivers to</b> — Tourism coordination data and visitor experience optimization insights</div>
+      </div>
+      <div class="strength">○</div>
+    </div><div class="conn-card" onclick="selectProject('P05')">
+      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(59, event); return false;">−</button>
+      <div class="arrow" style="color:#E07B45;background:#E07B4516">→</div>
+      <div style="min-width:0;flex:1">
+        <div class="conn-name" style="color:#E07B45">P05 · Fiber/Ground</div>
+        <div class="conn-desc"><b>Delivers to</b> — Visitors for production-cycle tour.</div>
+      </div>
+      <div class="strength">○</div>
+    </div><div class="conn-card" onclick="selectProject('P22')">
+      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(75, event); return false;">−</button>
+      <div class="arrow" style="color:#D4A24C;background:#D4A24C16">→</div>
+      <div style="min-width:0;flex:1">
+        <div class="conn-name" style="color:#D4A24C">P22 · The Common Ground</div>
+        <div class="conn-desc"><b>Delivers to</b> — Shared Upper Egypt tourism corridor and tourist redirection.</div>
+      </div>
+      <div class="strength">○</div>
+    </div><div class="conn-card" onclick="selectProject('P13')">
+      <button type="button" class="remove-conn" title="Remove connection" onpointerdown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onmousedown="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();" onclick="removeConnectionAt(76, event); return false;">−</button>
+      <div class="arrow" style="color:#5BA4D4;background:#5BA4D416">→</div>
+      <div style="min-width:0;flex:1">
+        <div class="conn-name" style="color:#5BA4D4">P13 · Waste Collection &amp; Processing</div>
+        <div class="conn-desc"><b>Delivers to</b> — Project solid waste and ruined craft materials.</div>
+      </div>
+      <div class="strength">○</div>
+    </div></div>
+      </section>
+    </div></div>
+    <div id="empty-state" class="empty" style="display: none;"><strong>Select a project</strong>Click any card below to explore its inputs, outputs, and connection note.</div>
+    <div id="project-grid" class="project-grid">
+    <article class="project-card" onclick="selectProject('P01')">
+      <div>
+        <div class="card-top"><span class="pid">P01</span><span class="pid">15 links</span></div>
+        <div class="project-name">Nile Geo-Core</div>
+        <div class="project-meta">Mohamed Khaled</div>
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#4CAF8218;color:#4CAF82;border:1px solid #4CAF8240">Agricultural &amp; Root Ground</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P02')">
+      <div>
+        <div class="card-top"><span class="pid">P02</span><span class="pid">16 links</span></div>
+        <div class="project-name">Digital Roots</div>
+        <div class="project-meta">Sara Mohamed Ali</div>
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#4CAF8218;color:#4CAF82;border:1px solid #4CAF8240">Agricultural &amp; Root Ground</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P03')">
+      <div>
+        <div class="card-top"><span class="pid">P03</span><span class="pid">5 links</span></div>
+        <div class="project-name">Root-Link Field Stations</div>
+        
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#4CAF8218;color:#4CAF82;border:1px solid #4CAF8240">Agricultural &amp; Root Ground</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P04')">
+      <div>
+        <div class="card-top"><span class="pid">P04</span><span class="pid">4 links</span></div>
+        <div class="project-name">Smart Water Control Station</div>
+        
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#4CAF8218;color:#4CAF82;border:1px solid #4CAF8240">Agricultural &amp; Root Ground</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P05')">
+      <div>
+        <div class="card-top"><span class="pid">P05</span><span class="pid">6 links</span></div>
+        <div class="project-name">Fiber/Ground</div>
+        <div class="project-meta">Abdelrahman Yasser</div>
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#E07B4518;color:#E07B45;border:1px solid #E07B4540">Industrial &amp; Craft Engine</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P06')">
+      <div>
+        <div class="card-top"><span class="pid">P06</span><span class="pid">3 links</span></div>
+        <div class="project-name">Magnetic Commons</div>
+        <div class="project-meta">Mazen Osama</div>
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#E07B4518;color:#E07B45;border:1px solid #E07B4540">Industrial &amp; Craft Engine</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P07')">
+      <div>
+        <div class="card-top"><span class="pid">P07</span><span class="pid">6 links</span></div>
+        <div class="project-name">ReField</div>
+        <div class="project-meta">Shahd Haytham</div>
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#E07B4518;color:#E07B45;border:1px solid #E07B4540">Industrial &amp; Craft Engine</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P08')">
+      <div>
+        <div class="card-top"><span class="pid">P08</span><span class="pid">5 links</span></div>
+        <div class="project-name">Bio-Material Pilot Facility</div>
+        
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#E07B4518;color:#E07B45;border:1px solid #E07B4540">Industrial &amp; Craft Engine</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P09')">
+      <div>
+        <div class="card-top"><span class="pid">P09</span><span class="pid">4 links</span></div>
+        <div class="project-name">Agri-Tech Fabrication Foundry</div>
+        
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#E07B4518;color:#E07B45;border:1px solid #E07B4540">Industrial &amp; Craft Engine</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P10')">
+      <div>
+        <div class="card-top"><span class="pid">P10</span><span class="pid">8 links</span></div>
+        <div class="project-name">SYNTROPY</div>
+        <div class="project-meta">Reina Yasser</div>
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#5BA4D418;color:#5BA4D4;border:1px solid #5BA4D440">Logistics &amp; River Spine</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P11')">
+      <div>
+        <div class="card-top"><span class="pid">P11</span><span class="pid">10 links</span></div>
+        <div class="project-name">Logistics-South-01</div>
+        <div class="project-meta">Omar Walid</div>
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#5BA4D418;color:#5BA4D4;border:1px solid #5BA4D440">Logistics &amp; River Spine</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P12')">
+      <div>
+        <div class="card-top"><span class="pid">P12</span><span class="pid">8 links</span></div>
+        <div class="project-name">Red Nile</div>
+        <div class="project-meta">Clara George Shaker</div>
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#5BA4D418;color:#5BA4D4;border:1px solid #5BA4D440">Logistics &amp; River Spine</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P13')">
+      <div>
+        <div class="card-top"><span class="pid">P13</span><span class="pid">8 links</span></div>
+        <div class="project-name">Waste Collection &amp; Processing</div>
+        
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#5BA4D418;color:#5BA4D4;border:1px solid #5BA4D440">Logistics &amp; River Spine</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P14')">
+      <div>
+        <div class="card-top"><span class="pid">P14</span><span class="pid">6 links</span></div>
+        <div class="project-name">Distribution Hub</div>
+        
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#5BA4D418;color:#5BA4D4;border:1px solid #5BA4D440">Logistics &amp; River Spine</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P15')">
+      <div>
+        <div class="card-top"><span class="pid">P15</span><span class="pid">1 links</span></div>
+        <div class="project-name">NileFlow – Sediment Transport</div>
+        
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#5BA4D418;color:#5BA4D4;border:1px solid #5BA4D440">Logistics &amp; River Spine</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P16')">
+      <div>
+        <div class="card-top"><span class="pid">P16</span><span class="pid">6 links</span></div>
+        <div class="project-name">Nile Wheat Nexus</div>
+        <div class="project-meta">Andrew Ashraf</div>
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#B07FD418;color:#B07FD4;border:1px solid #B07FD440">Research &amp; Mind Lab</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P17')">
+      <div>
+        <div class="card-top"><span class="pid">P17</span><span class="pid">11 links</span></div>
+        <div class="project-name">Bio-Digital Nexus</div>
+        <div class="project-meta">Youstina Samy</div>
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#B07FD418;color:#B07FD4;border:1px solid #B07FD440">Research &amp; Mind Lab</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P18')">
+      <div>
+        <div class="card-top"><span class="pid">P18</span><span class="pid">11 links</span></div>
+        <div class="project-name">Nile Helix</div>
+        <div class="project-meta">Fatma Sayed</div>
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#B07FD418;color:#B07FD4;border:1px solid #B07FD440">Research &amp; Mind Lab</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P19')">
+      <div>
+        <div class="card-top"><span class="pid">P19</span><span class="pid">5 links</span></div>
+        <div class="project-name">Cotton-to-Textile Innovation</div>
+        
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#B07FD418;color:#B07FD4;border:1px solid #B07FD440">Research &amp; Mind Lab</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P20')">
+      <div>
+        <div class="card-top"><span class="pid">P20</span><span class="pid">3 links</span></div>
+        <div class="project-name">Corn &amp; Feed Systems Innovation</div>
+        
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#B07FD418;color:#B07FD4;border:1px solid #B07FD440">Research &amp; Mind Lab</span></div>
+    </article>
+    <article class="project-card active" onclick="selectProject('P21')">
+      <div>
+        <div class="card-top"><span class="pid">P21</span><span class="pid">12 links</span></div>
+        <div class="project-name">Recipro(Flow)</div>
+        <div class="project-meta">Shahd Alabbasy</div>
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#D4A24C18;color:#D4A24C;border:1px solid #D4A24C40">Tourism &amp; Story Paths</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P22')">
+      <div>
+        <div class="card-top"><span class="pid">P22</span><span class="pid">7 links</span></div>
+        <div class="project-name">The Common Ground</div>
+        <div class="project-meta">Abdelrahman Sherif</div>
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#D4A24C18;color:#D4A24C;border:1px solid #D4A24C40">Tourism &amp; Story Paths</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P23')">
+      <div>
+        <div class="card-top"><span class="pid">P23</span><span class="pid">5 links</span></div>
+        <div class="project-name">The Ascents</div>
+        <div class="project-meta">Abdelrahman Helal</div>
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#D4A24C18;color:#D4A24C;border:1px solid #D4A24C40">Tourism &amp; Story Paths</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P24')">
+      <div>
+        <div class="card-top"><span class="pid">P24</span><span class="pid">10 links</span></div>
+        <div class="project-name">Heritage Interpretation Center</div>
+        
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#D4A24C18;color:#D4A24C;border:1px solid #D4A24C40">Tourism &amp; Story Paths</span></div>
+    </article>
+    <article class="project-card" onclick="selectProject('P25')">
+      <div>
+        <div class="card-top"><span class="pid">P25</span><span class="pid">7 links</span></div>
+        <div class="project-name">Artisan Village &amp; Craft Hub</div>
+        
+      </div>
+      <div class="card-bottom"><span class="axis-chip" style="background:#D4A24C18;color:#D4A24C;border:1px solid #D4A24C40">Tourism &amp; Story Paths</span></div>
+    </article></div>
   </section>
 
   <section id="matrix-view" class="view">
@@ -212,8 +543,8 @@
       <div class="form-title">Add Connection</div>
       <div class="form-sub">New connections update the Explorer and Matrix live in this session.</div>
       <div class="form-grid">
-        <div class="fg"><label>From</label><select id="af"></select></div>
-        <div class="fg"><label>To</label><select id="at"></select></div>
+        <div class="fg"><label>From</label><select id="af"><option value="P01">P01 — Nile Geo-Core</option><option value="P02">P02 — Digital Roots</option><option value="P03">P03 — Root-Link Field Stations</option><option value="P04">P04 — Smart Water Control Station</option><option value="P05">P05 — Fiber/Ground</option><option value="P06">P06 — Magnetic Commons</option><option value="P07">P07 — ReField</option><option value="P08">P08 — Bio-Material Pilot Facility</option><option value="P09">P09 — Agri-Tech Fabrication Foundry</option><option value="P10">P10 — SYNTROPY</option><option value="P11">P11 — Logistics-South-01</option><option value="P12">P12 — Red Nile</option><option value="P13">P13 — Waste Collection &amp; Processing</option><option value="P14">P14 — Distribution Hub</option><option value="P15">P15 — NileFlow – Sediment Transport</option><option value="P16">P16 — Nile Wheat Nexus</option><option value="P17">P17 — Bio-Digital Nexus</option><option value="P18">P18 — Nile Helix</option><option value="P19">P19 — Cotton-to-Textile Innovation</option><option value="P20">P20 — Corn &amp; Feed Systems Innovation</option><option value="P21">P21 — Recipro(Flow)</option><option value="P22">P22 — The Common Ground</option><option value="P23">P23 — The Ascents</option><option value="P24">P24 — Heritage Interpretation Center</option><option value="P25">P25 — Artisan Village &amp; Craft Hub</option></select></div>
+        <div class="fg"><label>To</label><select id="at"><option value="P01">P01 — Nile Geo-Core</option><option value="P02">P02 — Digital Roots</option><option value="P03">P03 — Root-Link Field Stations</option><option value="P04">P04 — Smart Water Control Station</option><option value="P05">P05 — Fiber/Ground</option><option value="P06">P06 — Magnetic Commons</option><option value="P07">P07 — ReField</option><option value="P08">P08 — Bio-Material Pilot Facility</option><option value="P09">P09 — Agri-Tech Fabrication Foundry</option><option value="P10">P10 — SYNTROPY</option><option value="P11">P11 — Logistics-South-01</option><option value="P12">P12 — Red Nile</option><option value="P13">P13 — Waste Collection &amp; Processing</option><option value="P14">P14 — Distribution Hub</option><option value="P15">P15 — NileFlow – Sediment Transport</option><option value="P16">P16 — Nile Wheat Nexus</option><option value="P17">P17 — Bio-Digital Nexus</option><option value="P18">P18 — Nile Helix</option><option value="P19">P19 — Cotton-to-Textile Innovation</option><option value="P20">P20 — Corn &amp; Feed Systems Innovation</option><option value="P21">P21 — Recipro(Flow)</option><option value="P22">P22 — The Common Ground</option><option value="P23">P23 — The Ascents</option><option value="P24">P24 — Heritage Interpretation Center</option><option value="P25">P25 — Artisan Village &amp; Craft Hub</option></select></div>
         <div class="fg full"><label>What flows</label><textarea id="ad" placeholder="Describe what moves between the two projects…"></textarea></div>
         <div class="fg full"><label>Strength</label><div class="strength-row"><button class="strength-opt sel" data-str="●" onclick="pickStr(this)">● Strong</button><button class="strength-opt" data-str="○" onclick="pickStr(this)">○ Moderate</button></div></div>
       </div>
@@ -272,99 +603,552 @@ const P=[
 ];
 
 let CONNS=[
-  {f:'P01',t:'P02',w:'Genetic data & climate-resilient seeds',s:'●'},
-  {f:'P01',t:'P22',w:'Climate-resilient plant material for medicinal crops',s:'○'},
-  {f:'P02',t:'P16',w:'Farmer training methodology & local agricultural data',s:'●'},
-  {f:'P16',t:'P02',w:'Farmer training methodology & local agricultural data',s:'●'},
-  {f:'P02',t:'P17',w:'Agri-tech protocols & crop research data',s:'○'},
-  {f:'P17',t:'P02',w:'Vertical farming tech & crop data to local training',s:'○'},
-  {f:'P05',t:'P12',w:'CAF panels & manufactured materials',s:'●'},
-  {f:'P05',t:'P07',w:'Shared Nile barge logistics network',s:'●'},
-  {f:'P07',t:'P05',w:'Shared Nile barge logistics network',s:'●'},
-  {f:'P06',t:'P11',w:'Processed minerals & magnetic products for export',s:'○'},
-  {f:'P07',t:'P12',w:'Bio-composite materials for distribution',s:'●'},
-  {f:'P07',t:'P10',w:'Shared Nile river logistics spine',s:'●'},
-  {f:'P10',t:'P07',w:'Shared Nile river logistics spine',s:'●'},
-  {f:'P10',t:'P11',w:'Cold Corridor infrastructure & chilled produce',s:'●'},
-  {f:'P10',t:'P12',w:'Cold chain data & sorted produce',s:'●'},
-  {f:'P11',t:'P12',w:'African import/export flow coordinated through central hub',s:'○'},
-  {f:'P12',t:'P11',w:'African import/export flow coordinated through central hub',s:'○'},
-  {f:'P12',t:'P21',w:'Logistics connectivity enabling tourist access to Qena',s:'○'},
-  {f:'P21',t:'P23',w:'Shared Upper Egypt tourism corridor, tourist redirection',s:'●'},
-  {f:'P23',t:'P21',w:'Shared Upper Egypt tourism corridor, tourist redirection',s:'●'},
-  {f:'P18',t:'P22',w:'Collagen & wellness products to agrotourism retreat',s:'○'},
-  {f:'P01',t:'P16',w:'Seed genomics data supporting crop resilience research',s:'○'},
-  {f:'P05',t:'P11',w:'Construction materials exported via southern gateway',s:'○'},
-  {f:'P02',t:'P03',w:'Digital consultation tools, agronomic training modules, and data visualization platforms',s:'●'},
-  {f:'P01',t:'P03',w:'Climate-adapted seed varieties for local testing and demonstration',s:'●'},
-  {f:'P03',t:'P02',w:'Remote field sensor data, seed testing results, and community digital literacy needs',s:'●'},
-  {f:'P03',t:'P01',w:'Field validation data from remote floodplain sites for genetic breeding',s:'○'},
-  {f:'P02',t:'P04',w:'Soil moisture analytics, crop water demand forecasts, and automated irrigation schedules',s:'●'},
-  {f:'P04',t:'P02',w:'Real-time irrigation performance metrics, water flow data, and SCADA analytics',s:'●'},
-  {f:'P04',t:'P17',w:'Water control automation expertise for vertical farm irrigation systems',s:'○'},
-  {f:'P13',t:'P08',w:'Pre-processed agricultural biomass — rice straw, wheat residues, flax fibers',s:'●'},
-  {f:'P18',t:'P08',w:'Research-validated bio-formulations and biomedical material specifications',s:'●'},
-  {f:'P08',t:'P14',w:'Finished biomedical materials ready for medical evaluation and hospital distribution',s:'●'},
-  {f:'P08',t:'P18',w:'Biomedical material testing feedback for research protocol refinement — circular',s:'○'},
-  {f:'P17',t:'P09',w:'Design specifications for hydroponic racks, precision LED systems, and IoT sensors',s:'●'},
-  {f:'P12',t:'P09',w:'River logistics access for raw material delivery and equipment distribution',s:'○'},
-  {f:'P09',t:'P17',w:'Custom-fabricated indoor agriculture hardware including harvesting robotics',s:'●'},
-  {f:'P09',t:'P02',w:'Agricultural IoT sensors and precision farming equipment for campus demonstration',s:'○'},
-  {f:'P10',t:'P13',w:'Coordinated agricultural waste collection scheduling and cold storage access',s:'○'},
-  {f:'P20',t:'P13',w:'Corn stalk processing protocols and silage quality standards',s:'○'},
-  {f:'P13',t:'P07',w:'Agricultural runoff materials and organic waste for bio-composite processing',s:'○'},
-  {f:'P13',t:'P18',w:'Standardized agricultural waste research samples and aquaculture by-products',s:'○'},
-  {f:'P18',t:'P14',w:'Research publications and healthcare innovation documentation',s:'○'},
-  {f:'P14',t:'P24',w:'Medical supply chain success stories for heritage center educational exhibits',s:'○'},
-  {f:'P14',t:'P18',w:'Hospital medical material performance data for research optimization — circular',s:'○'},
-  {f:'P01',t:'P20',w:'Drought-tolerant corn cultivars and feed crop genetic material',s:'●'},
-  {f:'P20',t:'P02',w:'Corn crop performance data and feed system efficiency metrics',s:'○'},
-  {f:'P20',t:'P01',w:'Corn genetic requirements for heat stress tolerance and irrigation efficiency',s:'○'},
-  {f:'P25',t:'P19',w:'Artisan feedback on textile performance, weaving insights, and craft market demands',s:'○'},
-  {f:'P19',t:'P12',w:'Textile prototypes and cotton products for international distribution via logistics hub',s:'●'},
-  {f:'P19',t:'P25',w:'Cotton textile prototypes, natural dye formulations, and weaving technique documentation',s:'●'},
-  {f:'P19',t:'P07',w:'Cotton fiber waste recycling protocols for bio-composite material integration',s:'○'},
-  {f:'P17',t:'P24',w:'Vertical farming technology exhibits and precision agriculture visualization',s:'○'},
-  {f:'P22',t:'P24',w:'Agri-tourism visitor insights and community marketplace success metrics',s:'○'},
-  {f:'P21',t:'P24',w:'Tourism coordination data and visitor experience optimization insights',s:'○'},
-  {f:'P23',t:'P24',w:'Panoramic observation insights and suspended architecture documentation',s:'○'},
-  {f:'P24',t:'P03',w:'Heritage center visitor referrals for authentic farming experiences',s:'○'},
-  {f:'P24',t:'P25',w:'Visitor flows seeking hands-on craft workshops and artisan experiences',s:'●'},
-  {f:'P07',t:'P25',w:'Bio-composite building materials for artisan village construction and workshops',s:'○'},
-  {f:'P25',t:'P22',w:'Artisan crafts for Common Ground marketplace and cultural experience programming',s:'○'},
-  {f:'P25',t:'P01',w:'Traditional seed preservation knowledge from artisan community — circular',s:'○'},
-  {f:'P16',t:'P10',w:'Loss-reduction protocols for transport and handling.',s:'○'},
-  {f:'P13',t:'P05',w:'Fibrous agricultural waste residue.',s:'○'},
-  {f:'P21',t:'P05',w:'Visitors for production-cycle tour.',s:'○'},
-  {f:'P12',t:'P06',w:'River logistics access for raw material delivery.',s:'○'},
-  {f:'P06',t:'P14',w:'Separated and processed minerals ready for distribution.',s:'○'},
-  {f:'P17',t:'P01',w:'Advanced genomic data and bio-research to guide physical seed engineering.',s:'○'},
-  {f:'P04',t:'P01',w:'Real-time hydrological data and flood predictions to simulate water-stress scenarios.',s:'○'},
-  {f:'P14',t:'P01',w:'Nationwide raw seed samples and biological specimens via river logistics.',s:'○'},
-  {f:'P01',t:'P08',w:'Agricultural biomass and organic waste from testing fields for bio-material upcycling.',s:'○'},
-  {f:'P16',t:'P11',w:'Wheat received and exported among the hub’s Egyptian agricultural export.',s:'○'},
-  {f:'P01',t:'P11',w:'Seeds received and exported among the hub’s Egyptian agricultural export.',s:'○'},
-  {f:'P17',t:'P11',w:'Harvested crop yields and farming produce distributed for export.',s:'○'},
-  {f:'P18',t:'P11',w:'Vitamins, collagen, wellness products, and medical products exported as part of manufactured goods.',s:'○'},
-  {f:'P11',t:'P23',w:'Imported African livestock.',s:'○'},
-  {f:'P22',t:'P21',w:'Shared Upper Egypt tourism corridor and tourist redirection.',s:'○'},
-  {f:'P10',t:'P21',w:'Chilled, sorted, and processed agricultural products for restaurants, cafés, and tourism food services.',s:'○'},
-  {f:'P18',t:'P21',w:'Egyptian body care products, collagen-based skincare, and promotion of local Egyptian products for tourists.',s:'○'},
-  {f:'P19',t:'P21',w:'Artisan feedback on textile performance, weaving insights, and craft market demands.',s:'○'},
-  {f:'P21',t:'P22',w:'Shared Upper Egypt tourism corridor and tourist redirection.',s:'○'},
-  {f:'P21',t:'P13',w:'Project solid waste and ruined craft materials.',s:'○'},
-  {f:'P10',t:'P23',w:'Chilled and sorted produce.',s:'○'},
-  {f:'P10',t:'P22',w:'Chilled and sorted produce.',s:'○'},
-  {f:'P01',t:'P17',w:'Extract and process seed stock.',s:'○'},
-  {f:'P18',t:'P17',w:'Fish stock for the aquaponic system.',s:'○'},
-  {f:'P17',t:'P10',w:'Distribute harvested crop yields.',s:'○'},
-  {f:'P01',t:'P18',w:'Nutrient-rich seeds and reusable agricultural residues as sustainable feed supplements that improve fish health and collagen quality.',s:'○'},
-  {f:'P18',t:'P16',w:'Performance data and fish health results are sent back to the wheat research zone to evaluate how agricultural waste improves fish growth and collagen quality.',s:'○'},
-  {f:'P15',t:'P02',w:'Hydrological sediment transport data and raw floodplain soil metrics to guide localized, flood-adaptive cultivation trials.',s:'○'},
-  {f:'P24',t:'P02',w:'Regional visitor streams and educational tourist flows looking to engage in hands-on community workshops and field training.',s:'○'},
-  {f:'P02',t:'P13',w:'Raw agricultural biomass and crop cultivation residues to be aggregated, stabilized, and processed into regional secondary raw materials.',s:'○'},
-  {f:'P02',t:'P25',w:'Palm fronds and raw botanical waste to directly supply local artisan workshops with materials for traditional basket-weaving and craft production.',s:'○'},
-  {f:'P02',t:'P24',w:'Localized agri-tech innovation milestones and community resilience metrics to enrich cross-axis regional educational exhibits.',s:'○'},
+  {
+    "f": "P01",
+    "t": "P02",
+    "w": "Genetic data \u0026 climate-resilient seeds",
+    "s": "●"
+  },
+  {
+    "f": "P01",
+    "t": "P22",
+    "w": "Climate-resilient plant material for medicinal crops",
+    "s": "○"
+  },
+  {
+    "f": "P02",
+    "t": "P16",
+    "w": "Farmer training methodology \u0026 local agricultural data",
+    "s": "●"
+  },
+  {
+    "f": "P16",
+    "t": "P02",
+    "w": "Climate-resilient wheat cultivation protocols, seed-to-bread quality standards, and national agricultural certification frameworks to deploy at the local scale.",
+    "s": "●"
+  },
+  {
+    "f": "P02",
+    "t": "P17",
+    "w": "Agri-tech protocols \u0026 crop research data",
+    "s": "○"
+  },
+  {
+    "f": "P17",
+    "t": "P02",
+    "w": "Vertical farming tech \u0026 crop data to local training",
+    "s": "○"
+  },
+  {
+    "f": "P05",
+    "t": "P12",
+    "w": "CAF panels \u0026 manufactured materials",
+    "s": "●"
+  },
+  {
+    "f": "P05",
+    "t": "P07",
+    "w": "Shared Nile barge logistics network",
+    "s": "●"
+  },
+  {
+    "f": "P07",
+    "t": "P05",
+    "w": "Shared Nile barge logistics network",
+    "s": "●"
+  },
+  {
+    "f": "P06",
+    "t": "P11",
+    "w": "Processed minerals \u0026 magnetic products for export",
+    "s": "○"
+  },
+  {
+    "f": "P07",
+    "t": "P12",
+    "w": "Bio-composite materials for distribution",
+    "s": "●"
+  },
+  {
+    "f": "P10",
+    "t": "P11",
+    "w": "Cold Corridor infrastructure \u0026 chilled produce",
+    "s": "●"
+  },
+  {
+    "f": "P11",
+    "t": "P12",
+    "w": "African import/export flow coordinated through central hub",
+    "s": "○"
+  },
+  {
+    "f": "P12",
+    "t": "P11",
+    "w": "African import/export flow coordinated through central hub",
+    "s": "○"
+  },
+  {
+    "f": "P12",
+    "t": "P21",
+    "w": "Logistics connectivity enabling tourist access to Qena",
+    "s": "○"
+  },
+  {
+    "f": "P21",
+    "t": "P23",
+    "w": "Shared Upper Egypt tourism corridor, tourist redirection",
+    "s": "●"
+  },
+  {
+    "f": "P23",
+    "t": "P21",
+    "w": "Shared Upper Egypt tourism corridor, tourist redirection",
+    "s": "●"
+  },
+  {
+    "f": "P18",
+    "t": "P22",
+    "w": "Collagen \u0026 wellness products to agrotourism retreat",
+    "s": "○"
+  },
+  {
+    "f": "P01",
+    "t": "P16",
+    "w": "Seed genomics data supporting crop resilience research",
+    "s": "○"
+  },
+  {
+    "f": "P05",
+    "t": "P11",
+    "w": "Construction materials exported via southern gateway",
+    "s": "○"
+  },
+  {
+    "f": "P02",
+    "t": "P03",
+    "w": "Digital consultation tools, agronomic training modules, and data visualization platforms",
+    "s": "●"
+  },
+  {
+    "f": "P01",
+    "t": "P03",
+    "w": "Climate-adapted seed varieties for local testing and demonstration",
+    "s": "●"
+  },
+  {
+    "f": "P03",
+    "t": "P02",
+    "w": "Remote field sensor data, seed testing results, and community digital literacy needs",
+    "s": "●"
+  },
+  {
+    "f": "P03",
+    "t": "P01",
+    "w": "Field validation data from remote floodplain sites for genetic breeding",
+    "s": "○"
+  },
+  {
+    "f": "P02",
+    "t": "P04",
+    "w": "Soil moisture analytics, crop water demand forecasts, and automated irrigation schedules",
+    "s": "●"
+  },
+  {
+    "f": "P04",
+    "t": "P02",
+    "w": "Real-time irrigation performance metrics, water flow data, and SCADA analytics",
+    "s": "●"
+  },
+  {
+    "f": "P04",
+    "t": "P17",
+    "w": "Water control automation expertise for vertical farm irrigation systems",
+    "s": "○"
+  },
+  {
+    "f": "P13",
+    "t": "P08",
+    "w": "Pre-processed agricultural biomass — rice straw, wheat residues, flax fibers",
+    "s": "●"
+  },
+  {
+    "f": "P18",
+    "t": "P08",
+    "w": "Research-validated bio-formulations and biomedical material specifications",
+    "s": "●"
+  },
+  {
+    "f": "P08",
+    "t": "P14",
+    "w": "Finished biomedical materials ready for medical evaluation and hospital distribution",
+    "s": "●"
+  },
+  {
+    "f": "P08",
+    "t": "P18",
+    "w": "Biomedical material testing feedback for research protocol refinement — circular",
+    "s": "○"
+  },
+  {
+    "f": "P17",
+    "t": "P09",
+    "w": "Design specifications for hydroponic racks, precision LED systems, and IoT sensors",
+    "s": "●"
+  },
+  {
+    "f": "P12",
+    "t": "P09",
+    "w": "River logistics access for raw material delivery and equipment distribution",
+    "s": "○"
+  },
+  {
+    "f": "P09",
+    "t": "P17",
+    "w": "Custom-fabricated indoor agriculture hardware including harvesting robotics",
+    "s": "●"
+  },
+  {
+    "f": "P09",
+    "t": "P02",
+    "w": "Agricultural IoT sensors and precision farming equipment for campus demonstration",
+    "s": "○"
+  },
+  {
+    "f": "P10",
+    "t": "P13",
+    "w": "Coordinated agricultural waste collection scheduling and cold storage access",
+    "s": "○"
+  },
+  {
+    "f": "P20",
+    "t": "P13",
+    "w": "Corn stalk processing protocols and silage quality standards",
+    "s": "○"
+  },
+  {
+    "f": "P13",
+    "t": "P07",
+    "w": "Agricultural runoff materials and organic waste for bio-composite processing",
+    "s": "○"
+  },
+  {
+    "f": "P13",
+    "t": "P18",
+    "w": "Standardized agricultural waste research samples and aquaculture by-products",
+    "s": "○"
+  },
+  {
+    "f": "P18",
+    "t": "P14",
+    "w": "Research publications and healthcare innovation documentation",
+    "s": "○"
+  },
+  {
+    "f": "P14",
+    "t": "P24",
+    "w": "Medical supply chain success stories for heritage center educational exhibits",
+    "s": "○"
+  },
+  {
+    "f": "P14",
+    "t": "P18",
+    "w": "Hospital medical material performance data for research optimization — circular",
+    "s": "○"
+  },
+  {
+    "f": "P01",
+    "t": "P20",
+    "w": "Drought-tolerant corn cultivars and feed crop genetic material",
+    "s": "●"
+  },
+  {
+    "f": "P20",
+    "t": "P01",
+    "w": "Corn genetic requirements for heat stress tolerance and irrigation efficiency",
+    "s": "○"
+  },
+  {
+    "f": "P25",
+    "t": "P19",
+    "w": "Artisan feedback on textile performance, weaving insights, and craft market demands",
+    "s": "○"
+  },
+  {
+    "f": "P19",
+    "t": "P12",
+    "w": "Textile prototypes and cotton products for international distribution via logistics hub",
+    "s": "●"
+  },
+  {
+    "f": "P19",
+    "t": "P25",
+    "w": "Cotton textile prototypes, natural dye formulations, and weaving technique documentation",
+    "s": "●"
+  },
+  {
+    "f": "P19",
+    "t": "P07",
+    "w": "Cotton fiber waste recycling protocols for bio-composite material integration",
+    "s": "○"
+  },
+  {
+    "f": "P17",
+    "t": "P24",
+    "w": "Vertical farming technology exhibits and precision agriculture visualization",
+    "s": "○"
+  },
+  {
+    "f": "P22",
+    "t": "P24",
+    "w": "Agri-tourism visitor insights and community marketplace success metrics",
+    "s": "○"
+  },
+  {
+    "f": "P21",
+    "t": "P24",
+    "w": "Tourism coordination data and visitor experience optimization insights",
+    "s": "○"
+  },
+  {
+    "f": "P23",
+    "t": "P24",
+    "w": "Panoramic observation insights and suspended architecture documentation",
+    "s": "○"
+  },
+  {
+    "f": "P24",
+    "t": "P03",
+    "w": "Heritage center visitor referrals for authentic farming experiences",
+    "s": "○"
+  },
+  {
+    "f": "P24",
+    "t": "P25",
+    "w": "Visitor flows seeking hands-on craft workshops and artisan experiences",
+    "s": "●"
+  },
+  {
+    "f": "P07",
+    "t": "P25",
+    "w": "Bio-composite building materials for artisan village construction and workshops",
+    "s": "○"
+  },
+  {
+    "f": "P25",
+    "t": "P22",
+    "w": "Artisan crafts for Common Ground marketplace and cultural experience programming",
+    "s": "○"
+  },
+  {
+    "f": "P25",
+    "t": "P01",
+    "w": "Traditional seed preservation knowledge from artisan community — circular",
+    "s": "○"
+  },
+  {
+    "f": "P16",
+    "t": "P10",
+    "w": "Loss-reduction protocols for transport and handling.",
+    "s": "●"
+  },
+  {
+    "f": "P13",
+    "t": "P05",
+    "w": "Fibrous agricultural waste residue.",
+    "s": "○"
+  },
+  {
+    "f": "P21",
+    "t": "P05",
+    "w": "Visitors for production-cycle tour.",
+    "s": "○"
+  },
+  {
+    "f": "P12",
+    "t": "P06",
+    "w": "River logistics access for raw material delivery.",
+    "s": "○"
+  },
+  {
+    "f": "P06",
+    "t": "P14",
+    "w": "Separated and processed minerals ready for distribution.",
+    "s": "○"
+  },
+  {
+    "f": "P17",
+    "t": "P01",
+    "w": "Advanced genomic data and bio-research to guide physical seed engineering.",
+    "s": "○"
+  },
+  {
+    "f": "P04",
+    "t": "P01",
+    "w": "Real-time hydrological data and flood predictions to simulate water-stress scenarios.",
+    "s": "○"
+  },
+  {
+    "f": "P14",
+    "t": "P01",
+    "w": "Nationwide raw seed samples and biological specimens via river logistics.",
+    "s": "○"
+  },
+  {
+    "f": "P01",
+    "t": "P08",
+    "w": "Agricultural biomass and organic waste from testing fields for bio-material upcycling.",
+    "s": "○"
+  },
+  {
+    "f": "P16",
+    "t": "P11",
+    "w": "Wheat received and exported among the hub’s Egyptian agricultural export.",
+    "s": "○"
+  },
+  {
+    "f": "P01",
+    "t": "P11",
+    "w": "Seeds received and exported among the hub’s Egyptian agricultural export.",
+    "s": "○"
+  },
+  {
+    "f": "P17",
+    "t": "P11",
+    "w": "Harvested crop yields and farming produce distributed for export.",
+    "s": "○"
+  },
+  {
+    "f": "P18",
+    "t": "P11",
+    "w": "Vitamins, collagen, wellness products, and medical products exported as part of manufactured goods.",
+    "s": "○"
+  },
+  {
+    "f": "P11",
+    "t": "P23",
+    "w": "Imported African livestock.",
+    "s": "○"
+  },
+  {
+    "f": "P22",
+    "t": "P21",
+    "w": "Shared Upper Egypt tourism corridor and tourist redirection.",
+    "s": "○"
+  },
+  {
+    "f": "P10",
+    "t": "P21",
+    "w": "Chilled, sorted, and processed agricultural products for restaurants, cafés, and tourism food services.",
+    "s": "○"
+  },
+  {
+    "f": "P18",
+    "t": "P21",
+    "w": "Egyptian body care products, collagen-based skincare, and promotion of local Egyptian products for tourists.",
+    "s": "○"
+  },
+  {
+    "f": "P19",
+    "t": "P21",
+    "w": "Artisan feedback on textile performance, weaving insights, and craft market demands.",
+    "s": "○"
+  },
+  {
+    "f": "P21",
+    "t": "P22",
+    "w": "Shared Upper Egypt tourism corridor and tourist redirection.",
+    "s": "○"
+  },
+  {
+    "f": "P21",
+    "t": "P13",
+    "w": "Project solid waste and ruined craft materials.",
+    "s": "○"
+  },
+  {
+    "f": "P10",
+    "t": "P23",
+    "w": "Chilled and sorted produce.",
+    "s": "○"
+  },
+  {
+    "f": "P10",
+    "t": "P22",
+    "w": "Chilled and sorted produce.",
+    "s": "○"
+  },
+  {
+    "f": "P01",
+    "t": "P17",
+    "w": "Extract and process seed stock.",
+    "s": "○"
+  },
+  {
+    "f": "P18",
+    "t": "P17",
+    "w": "Fish stock for the aquaponic system.",
+    "s": "○"
+  },
+  {
+    "f": "P17",
+    "t": "P10",
+    "w": "Distribute harvested crop yields.",
+    "s": "○"
+  },
+  {
+    "f": "P01",
+    "t": "P18",
+    "w": "Nutrient-rich seeds and reusable agricultural residues as sustainable feed supplements that improve fish health and collagen quality.",
+    "s": "○"
+  },
+  {
+    "f": "P18",
+    "t": "P16",
+    "w": "Performance data and fish health results are sent back to the wheat research zone to evaluate how agricultural waste improves fish growth and collagen quality.",
+    "s": "○"
+  },
+  {
+    "f": "P15",
+    "t": "P02",
+    "w": "Hydrological sediment transport data and raw floodplain soil metrics to guide localized, flood-adaptive cultivation trials.",
+    "s": "○"
+  },
+  {
+    "f": "P24",
+    "t": "P02",
+    "w": "Regional visitor streams and educational tourist flows looking to engage in hands-on community workshops and field training.",
+    "s": "○"
+  },
+  {
+    "f": "P02",
+    "t": "P13",
+    "w": "Raw agricultural biomass and crop cultivation residues to be aggregated, stabilized, and processed into regional secondary raw materials.",
+    "s": "○"
+  },
+  {
+    "f": "P02",
+    "t": "P25",
+    "w": "Palm fronds and raw botanical waste to directly supply local artisan workshops with materials for traditional basket-weaving and craft production.",
+    "s": "○"
+  },
+  {
+    "f": "P02",
+    "t": "P24",
+    "w": "Localized agri-tech innovation milestones and community resilience metrics to enrich cross-axis regional educational exhibits.",
+    "s": "○"
+  },
+  {
+    "f": "P02",
+    "t": "P10",
+    "w": "Premium high-value botanicals and fresh vegetables to plug local farm outputs into the Nile cold-chain corridor, expanding regional economic market reach.",
+    "s": "○"
+  },
+  {
+    "f": "P24",
+    "t": "P21",
+    "w": "Shared Upper Egypt tourism corridor and tourist redirection.",
+    "s": "○"
+  }
 ];
 
 
@@ -692,5 +1476,6 @@ function saveHTML(){
 
 initStats(); initFilters(); populateSelects(); renderExplorer();
 </script>
-</body>
-</html>
+
+
+</body></html>
