@@ -298,22 +298,32 @@
 </div>
 <script>
 const AX={agri:{l:'Agricultural & Root Ground',c:'#4CAF82'},indust:{l:'Industrial & Craft Engine',c:'#E07B45'},logist:{l:'Logistics & River Spine',c:'#5BA4D4'},research:{l:'Research & Mind Lab',c:'#B07FD4'},tourism:{l:'Tourism & Story Paths',c:'#D4A24C'}};
-// Add project shot file paths here when final images are ready. Shots appear only for projects that have student names.
+// Add project shot file paths here when final images are ready.
 const PROJECT_SHOTS={
   P01: "project_shots/P01.jpg",
   P02: "project_shots/P02.jpg",
+  P03: "project_shots/P03.jpg",
+  P04: "project_shots/P04.jpg",
   P05: "project_shots/P05.jpg",
   P06: "project_shots/P06.jpg",
   P07: "project_shots/P07.jpg",
+  P08: "project_shots/P08.jpg",
+  P09: "project_shots/P09.jpg",
   P10: "project_shots/P10.jpg",
   P11: "project_shots/P11.jpg",
   P12: "project_shots/P12.jpg",
+  P13: "project_shots/P13.jpg",
+  P14: "project_shots/P14.jpg",
   P15: "project_shots/P15.jpg",
   P16: "project_shots/P16.jpg",
   P17: "project_shots/P17.jpg",
+  P18: "project_shots/P18.jpg",
+  P19: "project_shots/P19.jpg",
   P20: "project_shots/P20.jpg",
   P21: "project_shots/P21.jpg",
-  P22: "project_shots/P22.jpg"
+  P22: "project_shots/P22.jpg",
+  P23: "project_shots/P23.jpg",
+  P24: "project_shots/P24.jpg"
 };
 const PROJECT_LOCATIONS={
   P01: {
@@ -1327,10 +1337,10 @@ function renderSelected(){
           <div class="location-sub">No coordinates were provided for this network-addition project.</div>`}
         </section>
       </div>
-      ${p.s ? `<section class="shot-card" style="--shot-color:${col}">
+      ${PROJECT_SHOTS[p.id] ? `<section class="shot-card" style="--shot-color:${col}">
         <h3>Project Shot</h3>
         <div class="shot-frame">
-          ${PROJECT_SHOTS[p.id] ? `<img src="${PROJECT_SHOTS[p.id]}" alt="${p.n} project shot">` : `<div class="shot-placeholder">${p.n}<span>Project shot placeholder · add image path in PROJECT_SHOTS</span></div>`}
+          <img src="${PROJECT_SHOTS[p.id]}" alt="${p.n} project shot">
         </div>
       </section>` : ''}
     </div>
