@@ -6,6 +6,8 @@
 <title>NILE 2050 — Connection Explorer</title>
 <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   :root{
@@ -193,6 +195,12 @@
   .map-toggle,.map-reset-soft{border:1px solid var(--line);background:rgba(255,255,255,.82);border-radius:999px;padding:9px 12px;font-size:12px;font-weight:900;color:var(--muted);cursor:pointer;box-shadow:var(--shadow-sm);transition:.16s}
   .map-toggle:hover,.map-reset-soft:hover{transform:translateY(-1px);background:#fff;color:var(--ink)}
   .map-toggle.active{background:var(--dark);border-color:var(--dark);color:#fff}
+
+  .map-export{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 12px;font-size:12px;font-weight:900;color:#101418;cursor:pointer;box-shadow:var(--shadow-sm);transition:.16s}
+  .map-export:hover{transform:translateY(-1px);background:var(--dark);border-color:var(--dark);color:#fff}
+  .map-export.busy{opacity:.55;pointer-events:none}
+  .map-export-note{font-size:11px;color:var(--muted);font-weight:800;background:rgba(255,255,255,.72);border:1px solid var(--line);border-radius:999px;padding:7px 10px;display:none}
+  .map-export-note.active{display:inline-flex}
   .map-marker{width:16px;height:16px;border-radius:999px;background:var(--axis);border:2px solid rgba(255,255,255,.96);box-shadow:0 5px 13px rgba(16,24,32,.22),0 0 0 1px rgba(16,24,32,.14);display:block;cursor:pointer;transition:transform .18s,opacity .18s,filter .18s,box-shadow .18s,border-color .18s;backdrop-filter:blur(8px)}
   .map-marker:before{content:"";position:absolute;inset:-5px;border-radius:999px;background:color-mix(in srgb,var(--axis) 16%, transparent);opacity:.55;transition:.18s}
   .map-marker:after{content:"";position:absolute;inset:4px;border-radius:999px;background:rgba(255,255,255,.72)}
@@ -274,7 +282,7 @@
 </div>
 </section>
 <section class="view" id="map-view">
-<div class="map-title"><div><h2>Project Map</h2><p>Interactive geographic view of the 24 projects. Click a project marker to highlight its direct network and fade unrelated projects.</p></div><div class="map-controls"><button class="map-toggle" id="all-connections-toggle" onclick="toggleAllMapConnections()">Show all connections</button><button class="map-reset-soft" onclick="clearMapSelection()">Reset map</button></div></div>
+<div class="map-title"><div><h2>Project Map</h2><p>Interactive geographic view of the 24 projects. Click a project marker to highlight its direct network and fade unrelated projects.</p></div><div class="map-controls"><button class="map-toggle" id="all-connections-toggle" onclick="toggleAllMapConnections()">Show all connections</button><button class="map-reset-soft" onclick="clearMapSelection()">Reset map</button><button class="map-export" id="download-current-map" onclick="downloadCurrentMapPNG()">Download PNG</button><button class="map-export" id="download-map-set" onclick="downloadMapConnectionSet()">Download map set</button><span class="map-export-note" id="map-export-note">Preparing export…</span></div></div>
 <div class="map-layout">
 <div class="map-card"><div id="nile-map"></div></div>
 <aside class="map-side" id="map-info"></aside>
@@ -1585,7 +1593,7 @@ function initMap(){
   if(!nileMap){
     el.innerHTML='';
     nileMap=L.map('nile-map',{scrollWheelZoom:true,zoomControl:true}).setView([27.5,30.8],6);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(nileMap);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,crossOrigin:true,attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(nileMap);
     mapLayerGroup=L.layerGroup().addTo(nileMap);
   }
   enableMapSideScrollHandoff();
@@ -1810,6 +1818,304 @@ function switchTab(tab){
   if(tab==='map') setTimeout(initMap,50);
 }
 
+
+
+function getAllProjectCoords(){
+  return P.map(p=>({p,coords:mapCoords(p.id)})).filter(d=>d.coords && Number.isFinite(d.coords[0]) && Number.isFinite(d.coords[1]));
+}
+
+function mercatorXY(lat,lng){
+  const sin=Math.sin(lat*Math.PI/180);
+  const y=0.5-Math.log((1+sin)/(1-sin))/(4*Math.PI);
+  const x=(lng+180)/360;
+  return [x,y];
+}
+
+function exportProjectProjection(width,height,state={}){
+  // Fixed geographic map frame. This avoids stretching the projects to fit the connections.
+  // It uses a Web-Mercator style projection, similar to the live Leaflet map.
+  const defaultEgypt={minLat:21.65,maxLat:32.15,minLng:24.55,maxLng:37.25};
+  let b={...defaultEgypt};
+  if(state.frame==='current' && nileMap){
+    const lb=nileMap.getBounds();
+    b={
+      minLat:lb.getSouth(), maxLat:lb.getNorth(),
+      minLng:lb.getWest(), maxLng:lb.getEast()
+    };
+  }
+  const pad=78;
+  const innerW=width-pad*2, innerH=height-pad*2;
+  const sw=mercatorXY(b.minLat,b.minLng), ne=mercatorXY(b.maxLat,b.maxLng);
+  let minX=sw[0], maxX=ne[0], minY=ne[1], maxY=sw[1];
+  const cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+  const boxW=maxX-minX, boxH=maxY-minY;
+  const targetRatio=innerW/innerH;
+  const boxRatio=boxW/boxH;
+  if(boxRatio<targetRatio){
+    const newW=boxH*targetRatio;
+    minX=cx-newW/2; maxX=cx+newW/2;
+  }else{
+    const newH=boxW/targetRatio;
+    minY=cy-newH/2; maxY=cy+newH/2;
+  }
+  const project=(coords)=>{
+    const [xw,yw]=mercatorXY(coords[0],coords[1]);
+    const x=pad+((xw-minX)/(maxX-minX))*innerW;
+    const y=pad+((yw-minY)/(maxY-minY))*innerH;
+    return [x,y];
+  };
+  return {project,minLat:b.minLat,maxLat:b.maxLat,minLng:b.minLng,maxLng:b.maxLng,frame:state.frame||'egypt'};
+}
+
+function escSVG(v){
+  return String(v??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+}
+
+function currentExportState(){
+  const axisMode=activeMapAxis();
+  if(focusedMapConnectionKey) return {type:'focus',key:focusedMapConnectionKey,hidden:new Set(hiddenMapConnections)};
+  if(showAllMapConnections) return {type:'all',hidden:new Set(hiddenMapConnections)};
+  if(selectedMapId) return {type:'project',id:selectedMapId,hidden:new Set(hiddenMapConnections)};
+  if(axisMode) return {type:'axis',axis:axisMode,hidden:new Set(hiddenMapConnections)};
+  return {type:'empty',hidden:new Set()};
+}
+
+function rowsForExportState(state){
+  const rows=allConns().map((c,idx)=>({...c,idx}));
+  let out=[];
+  if(state.type==='empty') out=[];
+  else if(state.type==='all') out=rows;
+  else if(state.type==='project') out=rows.filter(c=>c.f===state.id || c.t===state.id);
+  else if(state.type==='axis') out=mapAxisRows(state.axis);
+  else if(state.type==='focus') out=rows.filter(c=>connectionKey(c)===state.key);
+  const hidden=state.hidden || new Set();
+  return out.filter(c=>!hidden.has(connectionKey(c)));
+}
+
+function markerStateForExport(projectId,state,rows){
+  if(state.type==='empty' || state.type==='all') return 'normal';
+  if(state.type==='project'){
+    if(projectId===state.id) return 'selected';
+    const connected=new Set();
+    rows.forEach(c=>{connected.add(c.f); connected.add(c.t);});
+    return connected.has(projectId) ? 'connected' : 'faded';
+  }
+  if(state.type==='axis'){
+    const sets=mapAxisRelatedIds(state.axis);
+    if(sets.core.has(projectId)) return 'selected';
+    if(sets.related.has(projectId)) return 'connected';
+    return 'faded';
+  }
+  if(state.type==='focus'){
+    const connected=new Set();
+    rows.forEach(c=>{connected.add(c.f); connected.add(c.t);});
+    return connected.has(projectId) ? 'selected' : 'faded';
+  }
+  return 'normal';
+}
+
+function exportTitleForState(state){
+  if(state.type==='all') return 'All Connections';
+  if(state.type==='empty') return 'Project Locations — No Connections';
+  if(state.type==='project'){
+    const p=byId(state.id);
+    return `${displayId(state.id)} · ${p ? p.n : 'Project Connections'}`;
+  }
+  if(state.type==='axis') return `${AX[state.axis]?.l || 'Axis'} Connections`;
+  if(state.type==='focus') return 'Focused Connection';
+  return 'Project Map';
+}
+
+function exportStateSummary(state,rows){
+  if(state.type==='empty') return '24 project locations · connections hidden';
+  if(state.type==='all') return `${rows.length} visible connections · clean fixed connection frame`;
+  if(state.type==='project') return `${rows.length} direct connections · clean fixed connection frame`;
+  if(state.type==='axis') return `${rows.length} axis connections · clean fixed connection frame`;
+  if(state.type==='focus') return `${rows.length} focused connection · clean fixed connection frame`;
+  return 'Clean fixed connection frame';
+}
+
+function geoPath(coords,proj){
+  return coords.map((c,i)=>{
+    const pt=proj.project(c);
+    return `${i?'L':'M'} ${pt[0].toFixed(1)} ${pt[1].toFixed(1)}`;
+  }).join(' ');
+}
+
+function buildNetworkMapSVG(state,{width=1800,height=1120}={}){
+  const rows=rowsForExportState(state);
+  const proj=exportProjectProjection(width,height,state);
+  const projectPoints=new Map();
+  P.forEach(p=>{ const c=mapCoords(p.id); if(c) projectPoints.set(p.id,proj.project(c)); });
+
+  const bg=`
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eef5fa"/><stop offset="1" stop-color="#dcebf3"/></linearGradient>
+      <linearGradient id="sea" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6f2f7"/><stop offset="1" stop-color="#d6e9f1"/></linearGradient>
+      <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#101820" flood-opacity=".13"/></filter>
+      <filter id="wireShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="#101820" flood-opacity=".12"/></filter>
+      <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse"><path d="M42 0H0V42" fill="none" stroke="#cbd6e2" stroke-width="1" opacity=".20"/></pattern>
+    </defs>
+    <rect width="${width}" height="${height}" rx="36" fill="url(#bg)"/>
+    <rect width="${width}" height="${height}" rx="36" fill="url(#grid)" opacity=".28"/>
+    <rect x="28" y="28" width="${width-56}" height="${height-56}" rx="30" fill="none" stroke="#ffffff" stroke-width="2" opacity=".9"/>
+  `;
+
+  // Export background intentionally simplified: no Egypt outline or Nile map, only the connection network.
+  const mapBackground=`
+    <text x="${(width/2).toFixed(1)}" y="${(height/2).toFixed(1)}" font-size="34" font-weight="900" fill="#101820" opacity=".045" text-anchor="middle">NILE 2050 CONNECTION NETWORK</text>
+  `;
+
+  const wires=rows.map((c,i)=>{
+    const a=projectPoints.get(c.f), b=projectPoints.get(c.t);
+    if(!a || !b) return '';
+    const dx=b[0]-a[0], dy=b[1]-a[1], dist=Math.sqrt(dx*dx+dy*dy)||1;
+    const dir=i%2===0?1:-1;
+    const bend=(c.s==='●'?0.24:0.18)*dist*dir;
+    const nx=-dy/dist, ny=dx/dist;
+    const mx=(a[0]+b[0])/2 + nx*bend;
+    const my=(a[1]+b[1])/2 + ny*bend;
+    let color=axC(byId(c.f)?.ax), opacity=c.s==='●'?.95:.78, weight=c.s==='●'?6.4:4.6;
+    if(state.type==='project') color=c.f===state.id?'#1f7a4f':'#2b6cb0';
+    if(state.type==='focus'){ color='#101820'; opacity=.96; weight=7.0; }
+    const dash=c.s==='●'?'':' stroke-dasharray="10 9"';
+    const d=`M ${a[0].toFixed(1)} ${a[1].toFixed(1)} Q ${mx.toFixed(1)} ${my.toFixed(1)} ${b[0].toFixed(1)} ${b[1].toFixed(1)}`;
+    return `<path d="${d}" fill="none" stroke="#ffffff" stroke-width="${weight+11}" stroke-linecap="round" opacity=".94"/><path d="${d}" fill="none" stroke="#101820" stroke-width="${weight+3}" stroke-linecap="round" opacity=".10"/><path d="${d}" fill="none" stroke="${color}" stroke-width="${weight}" stroke-linecap="round" opacity="${opacity}"${dash} filter="url(#wireShadow)"/>`;
+  }).join('\n');
+
+  const markers=P.map(p=>{
+    const pt=projectPoints.get(p.id);
+    if(!pt) return '';
+    const stateClass=markerStateForExport(p.id,state,rows);
+    const faded=stateClass==='faded';
+    const selected=stateClass==='selected';
+    const connected=stateClass==='connected';
+    const r=selected?10.5:connected?8.8:7.2;
+    const color=axC(p.ax);
+    const opacity=faded ? .16 : 1;
+    const showLabel=(selected || connected || state.type==='all' || state.type==='empty');
+    const label=showLabel ? `<g opacity="${opacity}"><rect x="${(pt[0]+11).toFixed(1)}" y="${(pt[1]-12).toFixed(1)}" width="42" height="22" rx="11" fill="#ffffff" stroke="#bfc8d4" stroke-width="1.3" filter="url(#softShadow)"/><text x="${(pt[0]+32).toFixed(1)}" y="${(pt[1]+3.5).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="800" fill="#101820">${escSVG(displayId(p.id))}</text></g>` : '';
+    return `<g opacity="${opacity}"><circle cx="${pt[0].toFixed(1)}" cy="${pt[1].toFixed(1)}" r="${r+5}" fill="${color}" opacity=".14"/><circle cx="${pt[0].toFixed(1)}" cy="${pt[1].toFixed(1)}" r="${r}" fill="${color}" stroke="#ffffff" stroke-width="3.4" filter="url(#softShadow)"/><circle cx="${pt[0].toFixed(1)}" cy="${pt[1].toFixed(1)}" r="${Math.max(2.8,r-4)}" fill="#ffffff" opacity=".68"/></g>${label}`;
+  }).join('\n');
+
+  const legend=Object.entries(AX).map(([k,a],i)=>{
+    const x=74+(i%3)*270, y=height-72+Math.floor(i/3)*34;
+    return `<g><circle cx="${x}" cy="${y}" r="7" fill="${a.c}"/><text x="${x+14}" y="${y+4}" font-size="13" font-weight="700" fill="#475467">${escSVG(a.l)}</text></g>`;
+  }).join('\n');
+
+  const title=exportTitleForState(state);
+  const summary=exportStateSummary(state,rows);
+  const header=`
+    <text x="74" y="78" font-size="34" font-weight="900" letter-spacing="-1" fill="#101820">NILE 2050 · ${escSVG(title)}</text>
+    <text x="76" y="112" font-size="16" font-weight="700" fill="#667085">${escSVG(summary)}</text>
+    <text x="${width-74}" y="82" text-anchor="end" font-size="14" font-weight="800" fill="#667085">Clean fixed connection frame</text>
+  `;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><style>text{font-family:Inter,Arial,sans-serif}</style>${bg}${mapBackground}<g>${wires}</g><g>${markers}</g>${header}<g>${legend}</g></svg>`;
+}
+
+function svgToPNGBlob(svg,width=1800,height=1120){
+  return new Promise((resolve,reject)=>{
+    const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      canvas.width=width; canvas.height=height;
+      const ctx=canvas.getContext('2d');
+      ctx.fillStyle='#eef1f4';
+      ctx.fillRect(0,0,width,height);
+      ctx.drawImage(img,0,0,width,height);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(out=>out?resolve(out):reject(new Error('Canvas export failed')),'image/png');
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); reject(new Error('SVG image export failed')); };
+    img.src=url;
+  });
+}
+
+async function captureExportStateBlob(state){
+  const width=1800, height=1120;
+  const svg=buildNetworkMapSVG(state,{width,height});
+  return svgToPNGBlob(svg,width,height);
+}
+
+function setMapExportBusy(isBusy,label){
+  const note=document.getElementById('map-export-note');
+  const buttons=[document.getElementById('download-current-map'),document.getElementById('download-map-set')];
+  buttons.forEach(btn=>{ if(btn) btn.classList.toggle('busy',!!isBusy); });
+  if(note){
+    note.textContent=label || 'Preparing export…';
+    note.classList.toggle('active',!!isBusy);
+  }
+}
+
+function safeFileName(text){
+  return String(text||'map').replace(/[^a-z0-9\-_.]+/gi,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+}
+
+function downloadBlob(blob,filename){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+async function downloadCurrentMapPNG(){
+  switchTab('map');
+  await new Promise(resolve=>setTimeout(resolve,120));
+  initMap();
+  try{
+    setMapExportBusy(true,'Preparing current map PNG…');
+    const state=currentExportState();
+    state.frame='current';
+    const blob=await captureExportStateBlob(state);
+    downloadBlob(blob,'NILE2050_map_current.png');
+  } catch(err){
+    console.error(err);
+    alert('Map export failed. Please try again, or open the file from GitHub Pages rather than a local file.');
+  } finally{
+    setMapExportBusy(false);
+  }
+}
+
+async function downloadMapConnectionSet(){
+  if(typeof JSZip==='undefined'){
+    alert('ZIP export library could not load. Please check your internet connection and try again.');
+    return;
+  }
+  switchTab('map');
+  await new Promise(resolve=>setTimeout(resolve,120));
+  initMap();
+
+  const zip=new JSZip();
+  const states=[
+    {type:'empty',frame:'egypt',filename:'00_empty_connections.png',label:'Exporting empty map…',hidden:new Set()},
+    {type:'all',frame:'egypt',filename:'01_all_connections.png',label:'Exporting all connections…',hidden:new Set()},
+    ...P.map(p=>({type:'project',frame:'egypt',id:p.id,filename:`${displayId(p.id)}_${safeFileName(p.n)}.png`,label:`Exporting ${displayId(p.id)}…`,hidden:new Set()}))
+  ];
+
+  try{
+    setMapExportBusy(true,'Preparing fixed export frame…');
+    for(const state of states){
+      setMapExportBusy(true,state.label);
+      const blob=await captureExportStateBlob(state);
+      zip.file(state.filename,blob);
+      await new Promise(resolve=>setTimeout(resolve,20));
+    }
+    setMapExportBusy(true,'Building ZIP file…');
+    const zipBlob=await zip.generateAsync({type:'blob'});
+    downloadBlob(zipBlob,'NILE2050_map_connection_set.zip');
+  } catch(err){
+    console.error(err);
+    alert('Map set export failed. Please try again, or open the file from GitHub Pages rather than a local file.');
+  } finally{
+    setMapExportBusy(false);
+  }
+}
 
 function saveHTML(){
   // Export a new standalone HTML file with the current connection edits baked into the source.
